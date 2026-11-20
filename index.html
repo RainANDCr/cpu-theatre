@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN" data-accent="blue">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="CPU THEATRE 是一个完全运行在浏览器本地的 Y86-64 处理器可视化实验室：编写汇编、观察六阶段数据通路、追踪寄存器与内存变化。"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>CPU THEATRE · Y86-64 处理器可视化实验室</title>
+    <style>
+      /* 首屏底色先行，避免加载瞬间的白屏闪烁 */
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #04060c;
+      }
+      #root {
+        min-height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,86 @@
+name: Deploy to GitHub Pages
+
+# 只在 main 上发布。PR 不部署——预览站点会让「线上是什么」变得难以说清。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Pages 需要的三项权限：读代码、写 Pages、用 OIDC 换取部署凭据
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只保留一次发布；连续 push 时取消前一次，避免旧产物后到覆盖新产物
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 构建静态站点
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # 只需要 Web 产物，不下载 150 MB 的 Electron 运行时
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # 站点前缀不能写死：仓库改名、fork 到别人名下、或改成 <user>.github.io
+      # 用户主页仓库（根路径）都会让写死的 /repo/ 变成 404。
+      - name: 计算站点前缀
+        run: |
+          name="${GITHUB_REPOSITORY#*/}"
+          owner="${GITHUB_REPOSITORY%%/*}"
+          if [ "$name" = "$owner.github.io" ]; then
+            echo "CPU_BASE=/" >> "$GITHUB_ENV"
+          else
+            echo "CPU_BASE=/$name/" >> "$GITHUB_ENV"
+          fi
+          echo "站点前缀：$(tail -1 "$GITHUB_ENV")"
+
+      - name: 安装依赖
+        run: npm ci
+
+      # 发布前跑测试：Pages 上的产物不该比 CI 里的更可信
+      - name: 静态检查与单元测试
+        run: |
+          npm run lint
+          npm run typecheck
+          npm test
+
+      - name: 构建（含 404.html 回落）
+        run: npm run build:pages
+
+      - name: 校验产物前缀与回落文件
+        run: |
+          test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/.nojekyll
+          # index.html 里的资源必须带上站点前缀，否则子路径部署会全白
+          grep -q "${CPU_BASE}assets/" dist/index.html
+          echo "产物检查通过：$(du -sh dist | cut -f1)"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: 发布
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

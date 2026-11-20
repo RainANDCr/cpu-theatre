@@ -1,0 +1,11 @@
+# 仓库里统一 LF：CI 在 Linux 上跑，本地是 Windows，
+# 若仓库里存 CRLF，文本类校验（如 diff 与快照）会随平台变。
+* text=auto eol=lf
+
+# 二进制：不要让 git 试图转换
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
+*.asar binary
+*.zip binary

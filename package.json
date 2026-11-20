@@ -1,0 +1,63 @@
+{
+  "name": "cpu-theatre",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CPU THEATRE - A Visual Journey Inside the Processor. Y86-64 visual lab running fully offline.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "oxlint",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:prod": "node scripts/e2e-prod.mjs",
+    "desktop": "npm run build && node scripts/desktop-run.mjs",
+    "desktop:dev": "node scripts/desktop-dev.mjs",
+    "package:win": "npm run build && node scripts/package-desktop.mjs",
+    "smoke:desktop": "node scripts/desktop-run.mjs --smoke",
+    "smoke:packaged": "node scripts/smoke-packaged.mjs",
+    "docs:shots": "npm run build && node scripts/capture-docs.mjs",
+    "build:pages": "npm run build && node scripts/pages-postbuild.mjs"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "framer-motion": "^14.14.0",
+    "lucide-react": "^1.73.0",
+    "monaco-editor": "^0.56.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "@playwright/test": "^1.65.1",
+    "@tailwindcss/vite": "^4.3.5",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.12",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/coverage-v8": "^5.1.0",
+    "electron": "^45.4.1",
+    "jsdom": "^31.0.1",
+    "oxlint": "^1.90.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  },
+  "//overrides": "monaco-editor 0.56/0.57 内置的 dompurify 3.4.8 存在已知 XSS 公告；我们不需要改 monaco 的 API，只把 dompurify 顶到修复版本",
+  "overrides": {
+    "dompurify": "^3.4.18"
+  },
+  "main": "electron/main.cjs"
+}

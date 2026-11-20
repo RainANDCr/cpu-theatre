@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: 类型 / 单元 / 构建 / E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # CI 只验证 Web 版；Electron 运行时（约 150 MB）不必下载
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 静态检查
+        run: |
+          npm run lint
+          npm run typecheck
+
+      - name: 单元与组件测试
+        run: npm test
+
+      - name: 生产构建
+        run: npm run build
+
+      # CI 上没有预装 Edge，用 Playwright 自带的 Chromium（config 里按 CI 自动切换）
+      - name: 安装浏览器
+        run: npx playwright install --with-deps chromium
+
+      # 关键：跑 dist 而不是源码。视觉基线需要本机字体，不在 CI 跑。
+      - name: E2E（生产产物）
+        run: npx playwright test --project=functional
+        env:
+          E2E_TARGET: preview
+
+      - name: 上传失败现场
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
