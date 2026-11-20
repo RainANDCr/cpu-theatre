@@ -1,10 +1,12 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { PackageCheck, Pause, Play, RotateCcw, SkipForward, StepForward } from 'lucide-react'
 import { cn } from '../lib/cn'
 import type { PipeSlot } from '../core/pipe/PIPEProcessor'
 import { toHex } from '../core/cpu/word'
 import { formatValue } from '../core/isa/format'
 import { registerName } from '../core/isa/registers'
+import { speedProfile } from '../config/speed'
+import { useRunLoop } from '../hooks/useRunLoop'
 import { usePipeStore } from '../store/pipeStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { Badge } from '../components/ui/Badge'
@@ -115,13 +117,14 @@ export default function PipelineLab() {
   const pause = usePipeStore((s) => s.pause)
   const reset = usePipeStore((s) => s.reset)
 
+  // 单周期间隔同样来自速度档位。PIPE 一拍只推进 1/5 条指令，
+  // 所以用 pipelineMs（比 SEQ 的 instructionMs 短 25%），两个实验室手感一致。
   const speed = useSettingsStore((s) => s.animationSpeed)
-
-  useEffect(() => {
-    if (!isRunning) return
-    const timer = window.setInterval(step, Math.round(420 / speed))
-    return () => window.clearInterval(timer)
-  }, [isRunning, speed, step])
+  useRunLoop({
+    active: isRunning,
+    intervalMs: speedProfile(speed).pipelineMs,
+    tick: () => usePipeStore.getState().step(),
+  })
 
   const cpi = stats.instructions > 0 ? stats.cycles / stats.instructions : 0
   const terminated = stat === 'HLT' || stat === 'ADR' || stat === 'INS'

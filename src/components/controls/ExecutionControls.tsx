@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
 import { Pause, Play, RotateCcw, SkipForward, StepBack, StepForward } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '../../lib/cn'
 import { formatCycle, useCpuStore, type SimulatorMode } from '../../store/cpuStore'
 import { useSettingsStore, type AnimationSpeed } from '../../store/settingsStore'
+import { paceSeconds, speedProfile, SPEED_LEVELS } from '../../config/speed'
+import { useRunLoop } from '../../hooks/useRunLoop'
 import { Readout } from '../ui/Readout'
 import { Segmented } from '../ui/Segmented'
 import { T, useI18n } from '../../i18n'
@@ -79,23 +80,15 @@ export function ExecutionControls() {
 
   const terminated = status === 'HLT' || status === 'ADR' || status === 'INS'
 
-  // 运行循环：节奏由设置决定，结果仍然来自引擎的 step()。
-  // 每拍之前检查断点——「停在断点」是执行语义，不是界面装饰。
-  useEffect(() => {
-    if (!isRunning) return
-    const delay = Math.round(520 / speed)
-    const tick = () => {
-      const state = useCpuStore.getState()
-      if (state.atBreakpoint()) {
-        state.pause()
-        return
-      }
-      state.step()
-    }
-    tick()
-    const timer = window.setInterval(tick, delay)
-    return () => window.clearInterval(timer)
-  }, [isRunning, speed])
+  // 运行循环：节奏来自速度档位（config/speed），结果仍然来自引擎的 step()。
+  // 每拍之前的断点检查属于执行语义——「停在断点」不是界面装饰。
+  useRunLoop({
+    active: isRunning,
+    intervalMs: speedProfile(speed).instructionMs,
+    tick: () => useCpuStore.getState().step(),
+    shouldStop: () => useCpuStore.getState().atBreakpoint(),
+    onStop: () => useCpuStore.getState().pause(),
+  })
 
   return (
     <div className="flex h-12 shrink-0 items-center gap-2.5 border-b border-line/80 bg-shell/40 px-3">
@@ -209,11 +202,15 @@ export function ExecutionControls() {
             label={t('动画速度', 'Animation speed')}
             value={speed}
             onChange={setSpeed}
-            options={[
-              { value: 0.5, label: '0.5×' },
-              { value: 1, label: '1×' },
-              { value: 2, label: '2×' },
-            ]}
+            options={SPEED_LEVELS.map((level) => ({
+              value: level,
+              label: `${level}×`,
+              // 档位旁边说清楚「到底多慢」：2.4 s/条比「0.5×」更能让人判断选哪一档
+              title: t(
+                `每 ${paceSeconds(level)} 秒执行一条指令`,
+                `one instruction every ${paceSeconds(level)} s`,
+              ),
+            }))}
           />
         </div>
 

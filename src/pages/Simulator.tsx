@@ -14,9 +14,11 @@ import { CycleTimeline } from '../components/timeline/CycleTimeline'
 import { ExecutionLog } from '../components/timeline/ExecutionLog'
 import { Badge } from '../components/ui/Badge'
 import { Tabs } from '../components/ui/Tabs'
+import { speedProfile } from '../config/speed'
 import { useStagePlayback } from '../hooks/useStagePlayback'
 import { useCpuStore } from '../store/cpuStore'
 import { useEditorStore } from '../store/editorStore'
+import { useSettingsStore } from '../store/settingsStore'
 import { T, useI18n } from '../i18n'
 
 type ObserverTab = 'registers' | 'memory'
@@ -40,7 +42,6 @@ export default function Simulator() {
   const ensureLoaded = useCpuStore((s) => s.ensureLoaded)
   const getMemory = useCpuStore((s) => s.getMemory)
   const rewindTo = useCpuStore((s) => s.rewindTo)
-  const isRunning = useCpuStore((s) => s.isRunning)
   const addressToLine = useCpuStore((s) => s.addressToLine)
   const breakpoints = useCpuStore((s) => s.breakpoints)
   const toggleBreakpointAtLine = useCpuStore((s) => s.toggleBreakpointAtLine)
@@ -57,8 +58,10 @@ export default function Simulator() {
   const stale = engineReady && loadedSource !== source
   const memoryAnchor = trace?.memory?.address ?? pc
 
-  // 阶段播放：连续运行时压缩每阶段时长，否则动画追不上指令节奏
-  const playback = useStagePlayback(trace, isRunning ? 80 : 150)
+  // 阶段播放：每个阶段停留多久也由速度档位决定。
+  // 手调单步时同样适用——0.5× 下一条指令的六个阶段要播 ~2 秒，用来看清数据怎么走。
+  const speed = useSettingsStore((s) => s.animationSpeed)
+  const playback = useStagePlayback(trace, speedProfile(speed).stageMs)
 
   const activeLine = pc === null ? null : (addressToLine.get(Number(pc)) ?? null)
   const breakpointLines = useMemo(

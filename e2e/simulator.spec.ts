@@ -66,4 +66,26 @@ test.describe('CPU Simulator', () => {
     await expect(registerRow(page, '%rbx')).toContainText('0x14')
     await expect(logRows(page)).toHaveCount(2)
   })
+
+  test('0.5× 真的慢下来了：越过一秒仍然只走了一条指令', async ({ page }) => {
+    // 夹具默认 2×（让其余用例跑得快），这里显式切到最慢档
+    await page.getByRole('button', { name: '0.5×' }).click()
+    await page.getByRole('button', { name: '运行' }).click()
+
+    // 起跑的第一拍是立刻的
+    await expect(logRows(page)).toHaveCount(1)
+
+    // 0.5× = 2.4 秒一条。一秒多一点之后如果已经走第二条，
+    // 说明档位又被调回了「几毫秒一条」的老节奏。
+    await page.waitForTimeout(1200)
+    await expect(logRows(page)).toHaveCount(1)
+
+    await expect.poll(() => logRows(page).count(), { timeout: 4000 }).toBe(2)
+
+    // 暂停之后不再前进
+    await page.getByRole('button', { name: '暂停' }).click()
+    const frozen = await logRows(page).count()
+    await page.waitForTimeout(1500)
+    await expect(logRows(page)).toHaveCount(frozen)
+  })
 })

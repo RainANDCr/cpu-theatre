@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Panel } from '../components/ui/Panel'
 import { Segmented } from '../components/ui/Segmented'
 import { cn } from '../lib/cn'
+import { paceSeconds, SPEED_LEVELS } from '../config/speed'
 import { T, useI18n } from '../i18n'
 import {
   DEFAULT_SETTINGS,
@@ -21,12 +22,6 @@ const ACCENTS: { key: AccentKey; label: string; labelZh: string; hex: string }[]
   { key: 'purple', label: 'Electric Purple', labelZh: '控制紫', hex: '#a970ff' },
   { key: 'cyan', label: 'Signal Cyan', labelZh: '寄存器青', hex: '#2ee6d6' },
   { key: 'amber', label: 'ALU Amber', labelZh: '运算橙', hex: '#ffb457' },
-]
-
-const SPEEDS: { value: AnimationSpeed; label: string }[] = [
-  { value: 0.5, label: '0.5×' },
-  { value: 1, label: '1×' },
-  { value: 2, label: '2×' },
 ]
 
 function SettingRow({
@@ -108,6 +103,18 @@ export default function SettingsPage() {
     { value: 'dark', label: t('深色', 'Dark'), title: t('深色主题', 'Dark theme') },
     { value: 'light', label: t('浅色', 'Light'), title: t('浅色主题', 'Light theme') },
   ]
+
+  // 档位数与节奏都来自 config/speed，界面这里只负责把「多慢」写成人话
+  const speedOptions: { value: AnimationSpeed; label: string; title: string }[] = SPEED_LEVELS.map(
+    (level) => ({
+      value: level,
+      label: `${level}×`,
+      title: t(
+        `每 ${paceSeconds(level)} 秒执行一条指令`,
+        `one instruction every ${paceSeconds(level)} s`,
+      ),
+    }),
+  )
 
   return (
     <div className="mx-auto w-full max-w-[900px] px-5 pb-16 pt-8 lg:px-9 lg:pt-10">
@@ -270,20 +277,20 @@ export default function SettingsPage() {
             }
           />
           <SettingRow
-            label={<T zh="动画速度" en="Animation speed" />}
+            label={<T zh="运行速度" en="Run speed" />}
             hint={
               <T
                 block
-                zh="作用于总线粒子与单步节奏。1× 为真实时钟演示速度。"
-                en="Controls bus particles and stepping tempo. 1× matches the real clock demo."
+                zh="同时决定两件事：指令之间的间隔，和一条指令内部六个阶段的停留时长。0.5× 约 2.4 秒一条指令，够你看清数据怎么走；2× 约 0.6 秒。三档严格差一倍。"
+                en="Sets both the gap between instructions and how long each of the six stages stays on screen. 0.5× is about 2.4 s per instruction — enough to follow the data; 2× is about 0.6 s. Each step is exactly twice the previous one."
               />
             }
             control={
               <Segmented
-                label={t('动画速度', 'Animation speed')}
+                label={t('运行速度', 'Run speed')}
                 size="md"
                 value={animationSpeed}
-                options={SPEEDS}
+                options={speedOptions}
                 onChange={setAnimationSpeed}
               />
             }

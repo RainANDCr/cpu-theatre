@@ -1,7 +1,7 @@
 # 项目现状（STATUS）
 
 > 这一页回答三个问题：**现在能做什么、验证到什么程度、哪些事还没做。**
-> 更新于 2026-11-20（三语与双主题上线）。历史过程写在 `PHASE-*.md`，那里面的数字是当时的快照，不随代码更新。
+> 更新于 2026-11-20（三语与双主题上线；运行节奏重标定）。历史过程写在 `PHASE-*.md`，那里面的数字是当时的快照，不随代码更新。
 
 **在线地址**：<https://rainandcr.github.io/cpu-theatre/> —— 推送到 `main` 自动发布，不需要构建机。
 
@@ -11,7 +11,7 @@ CPU THEATRE 是一个可运行、可调试、可对拍的 Y86-64 处理器可视
 九个模块全部可用，引擎与界面严格分离，运行时零外部请求，Web 版与 Windows 免安装桌面版
 共用同一份构建产物。
 
-**当前质量门**：单元/组件 **311**（24 文件）、端到端 **35**（functional 31 + visual 4）、
+**当前质量门**：单元/组件 **322**（26 文件）、端到端 **36**（functional 32 + visual 4）、
 `tsc` 0 error、`oxlint` 0 warning、`dist` 3.5 MB。
 两条 GitHub Actions 流水线已在真实 runner 上跑通：`CI`（检查 + 测试 + 产物 E2E）
 与 `Deploy to GitHub Pages`。
@@ -32,6 +32,9 @@ CPU THEATRE 是一个可运行、可调试、可对拍的 Y86-64 处理器可视
 
 **全局能力**：界面语言三档（中文 / 英文 / 中英对照）、深色与浅色主题，
 都写进 `localStorage` 并在首屏绘制前应用；`<html lang>` 与 `data-theme` 随状态同步。
+**运行节奏**三档 `0.5× / 1× / 2×`，一个档位同时决定「指令之间等多久」与
+「一条指令内部每个阶段停多久」（2.4 s / 1.2 s / 0.6 s 一条指令），
+`src/config/speed.ts` 是唯一来源。
 
 **ISA**：27 条 Y86-64 指令（教材第 4 章），严格定长编码（1/2/9/10 字节）。
 **伪指令**：`.pos` / `.org` / `.align` / `.quad` / `.string`，详见 [ISA.md](ISA.md#7-汇编语法)。
@@ -39,8 +42,8 @@ CPU THEATRE 是一个可运行、可调试、可对拍的 Y86-64 处理器可视
 ## 3. 怎么验证
 
 ```bash
-npm test              # 304 单元/组件用例（约 20s）
-npm run test:e2e      # 30 端到端用例（约 40s）；--repeat-each=2 曾 60/60 稳定
+npm test              # 322 单元/组件用例（约 20s）
+npm run test:e2e      # 36 端到端用例（约 40s）；--repeat-each=2 曾 60/60 稳定
 npm run test:e2e:prod # 构建产物上的 26 条功能用例（约 17s，需先 npm run build）
 npm run typecheck     # tsc -b，0 error
 npm run lint          # oxlint，0 warning
@@ -65,6 +68,7 @@ CPU_BASE=cpu-theatre/ npm run build:pages      # 复现 Pages 产物（含 404.h
 | 桌面外壳 | 首页渲染 / Monaco 出 5 行 / 深链回落 index.html | `electron/main.cjs --smoke` |
 | 三语结构 | 三档语言下导航项数量不变；双语片段带 `lang="en"`；`html[lang]` 同步 | `tests/ui/i18n-theme.test.tsx`、`e2e/i18n-theme.spec.ts` |
 | 主题对比度 | 浅色主题正文 ≥ 4.5:1；半透明面板逐层合成后再算 | `e2e/i18n-theme.spec.ts` |
+| 运行节奏 | 三档严格差一倍；六阶段总时长装得进指令间隔；0.5× 下一秒钟只走一条；换档不多执行；暂停后冻住 | `tests/config/speed.test.ts`、`tests/ui/run-loop.test.tsx`、`e2e/simulator.spec.ts` |
 | Pages 子路径 | 资源前缀、深链 404 回落、Monaco 在 `/<repo>/` 下可用 | `scripts/pages-postbuild.mjs` + 部署前产物校验 |
 
 ### 发布
