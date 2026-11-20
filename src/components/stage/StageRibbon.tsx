@@ -1,4 +1,5 @@
 import type { StageName } from '../../core/execution/types'
+import { useI18n } from '../../i18n'
 import { cn } from '../../lib/cn'
 
 const ORDER: StageName[] = ['FETCH', 'DECODE', 'EXECUTE', 'MEMORY', 'WRITEBACK', 'PC_UPDATE']
@@ -27,6 +28,7 @@ export interface StageRibbonProps {
  * 这比任何文字解释都直观。
  */
 export function StageRibbon({ stages, current, className }: StageRibbonProps) {
+  const { t } = useI18n()
   const visited = new Set(stages)
   const currentIndex = current ? stages.indexOf(current) : -1
 
@@ -36,7 +38,7 @@ export function StageRibbon({ stages, current, className }: StageRibbonProps) {
         'flex shrink-0 items-center gap-1 border-t border-line/70 bg-void/40 px-2 py-1.5',
         className,
       )}
-      aria-label="执行阶段"
+      aria-label={t('执行阶段', 'Execution stages')}
     >
       {ORDER.map((stage, index) => {
         const reached = visited.has(stage)

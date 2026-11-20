@@ -20,7 +20,7 @@ describe('应用外壳与路由', () => {
     const nav = screen.getByRole('navigation')
     expect(within(nav).getAllByRole('link')).toHaveLength(NAV_MODULES.length)
     for (const module of NAV_MODULES) {
-      expect(within(nav).getByRole('link', { name: new RegExp(module.label) })).toBeInTheDocument()
+      expect(within(nav).getByRole('link', { name: new RegExp(`${module.labelZh}|${module.label}`) })).toBeInTheDocument()
     }
   })
 
@@ -44,7 +44,7 @@ describe('应用外壳与路由', () => {
     const user = userEvent.setup()
     renderAt()
 
-    await user.click(screen.getByRole('link', { name: /Pipeline Lab/ }))
+    await user.click(screen.getByRole('link', { name: /Pipeline Lab|流水线实验室/ }))
 
     expect(
       screen.getByRole('heading', { level: 1, name: /Pipeline Lab/ }),
@@ -113,10 +113,10 @@ describe('窄屏抽屉导航', () => {
       const drawer = screen.getByRole('dialog', { name: '模块导航' })
       expect(within(drawer).getByRole('navigation')).toBeInTheDocument()
       for (const module of NAV_MODULES) {
-        expect(within(drawer).getByRole('link', { name: new RegExp(module.label) })).toBeInTheDocument()
+        expect(within(drawer).getByRole('link', { name: new RegExp(`${module.labelZh}|${module.label}`) })).toBeInTheDocument()
       }
 
-      await user.click(within(drawer).getByRole('link', { name: /Pipeline Lab/ }))
+      await user.click(within(drawer).getByRole('link', { name: /Pipeline Lab|流水线实验室/ }))
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
       expect(screen.getByRole('heading', { level: 1, name: /Pipeline Lab/ })).toBeInTheDocument()
     } finally {

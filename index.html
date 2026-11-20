@@ -10,13 +10,35 @@
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>CPU THEATRE · Y86-64 处理器可视化实验室</title>
+    <script>
+      /*
+       * 在首屏绘制**之前**把主题与语言写到 <html> 上。
+       * 放到 React 里做（AppShell 的 effect）会晚一帧：浅色主题下会先闪一下深色底。
+       * 只读 localStorage、失败就保持默认，不阻塞解析。
+       */
+      try {
+        var raw = localStorage.getItem('cpu-theatre:settings')
+        var saved = raw ? JSON.parse(raw).state || {} : {}
+        var root = document.documentElement
+        root.dataset.theme = saved.theme === 'light' ? 'light' : 'dark'
+        root.dataset.accent = saved.accent || 'blue'
+        root.lang = saved.lang === 'en' ? 'en' : 'zh-CN'
+        root.dataset.lang = saved.lang || 'zh'
+      } catch (error) {
+        document.documentElement.dataset.theme = 'dark'
+      }
+    </script>
     <style>
-      /* 首屏底色先行，避免加载瞬间的白屏闪烁 */
+      /* 首屏底色先行，避免加载瞬间的白屏闪烁；两种主题各自给一版 */
       html,
       body {
         margin: 0;
         min-height: 100%;
         background: #04060c;
+      }
+      html[data-theme='light'],
+      html[data-theme='light'] body {
+        background: #eef2f8;
       }
       #root {
         min-height: 100vh;

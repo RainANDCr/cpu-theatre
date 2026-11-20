@@ -32,11 +32,11 @@ test.describe('窄屏抽屉导航', () => {
 
     await page.getByRole('button', { name: '打开模块导航' }).click()
     const drawer = page.getByRole('dialog', { name: '模块导航' })
-    await drawer.getByRole('link', { name: /Pipeline Lab/ }).click()
+    await drawer.getByRole('link', { name: /Pipeline Lab|流水线实验室/ }).click()
 
     await expect(page).toHaveURL(/\/pipeline$/)
     await expect(drawer).toBeHidden()
-    await expect(page.getByRole('heading', { level: 1, name: /Pipeline Lab/ })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /Pipeline Lab|流水线实验室/ })).toBeVisible()
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

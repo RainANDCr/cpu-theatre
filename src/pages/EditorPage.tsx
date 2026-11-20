@@ -6,6 +6,7 @@ import { PaneHeader } from '../components/layout/PaneHeader'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { cn } from '../lib/cn'
+import { useI18n, T } from '../i18n'
 import { EXAMPLES } from '../lib/y86-examples'
 import { useEditorStore } from '../store/editorStore'
 import { useProgramStore } from '../store/programStore'
@@ -14,6 +15,7 @@ import { useProgramStore } from '../store/programStore'
 const PAGE_HEIGHT = 'h-[calc(100dvh-84px)]'
 
 export default function EditorPage() {
+  const { t } = useI18n()
   const source = useEditorStore((state) => state.source)
   const setSource = useEditorStore((state) => state.setSource)
   const activeExampleId = useEditorStore((state) => state.activeExampleId)
@@ -38,7 +40,9 @@ export default function EditorPage() {
 
   return (
     <div className={`flex ${PAGE_HEIGHT} min-h-[540px] flex-col overflow-hidden`}>
-      <h1 className="sr-only">Instruction Editor · Y86-64 汇编</h1>
+      <h1 className="sr-only">
+        {t('Instruction Editor · Y86-64 汇编', 'Instruction Editor · Y86-64 assembly')}
+      </h1>
       <div className="flex h-11 shrink-0 items-center border-b border-line/80 bg-shell/40">
         {/* 示例列表自己横向滚动；操作组钉在右侧，窄屏下也不会被挤出可视区 */}
         <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pl-3 no-scrollbar">
@@ -76,16 +80,20 @@ export default function EditorPage() {
             </span>
           )}
           <span className="hidden font-mono text-[9.5px] text-ink-3 sm:inline">
-            {lineCount} lines{dirty ? ' · 已修改' : ''}
+            {lineCount} lines{dirty ? ` · ${t('已修改', 'modified')}` : ''}
           </span>
-          <Button size="sm" onClick={runAssemble} title="汇编并查看机器码（Ctrl+Enter）">
+          <Button
+            size="sm"
+            onClick={runAssemble}
+            title={t('汇编并查看机器码（Ctrl+Enter）', 'Assemble and show machine code (Ctrl+Enter)')}
+          >
             <Terminal size={12} />
-            汇编
+            <T zh="汇编" en="Assemble" />
           </Button>
-          <span title="执行引擎在 Phase 3 接入">
+          <span title={t('在模拟器里执行这段程序', 'Run this program in the simulator')}>
             <Button size="sm" variant="outline" disabled>
               <Play size={12} />
-              运行
+              <T zh="运行" en="Run" />
             </Button>
           </span>
         </div>
@@ -113,7 +121,7 @@ export default function EditorPage() {
               value={source}
               onChange={setSource}
               onSubmit={runAssemble}
-              ariaLabel="Y86-64 汇编编辑器"
+              ariaLabel={t('Y86-64 汇编编辑器', 'Y86-64 assembly editor')}
             />
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useUiStore } from '../../store/uiStore'
 import { Sidebar } from './Sidebar'
+import { useI18n } from '../../i18n'
 
 /**
  * 窄屏抽屉导航。
@@ -16,6 +17,7 @@ export function MobileNav() {
   const close = useUiStore((state) => state.closeMobileNav)
   const closeButton = useRef<HTMLButtonElement>(null)
   const restoreFocus = useRef<HTMLElement | null>(null)
+  const { t } = useI18n()
 
   useEffect(() => {
     restoreFocus.current = document.activeElement as HTMLElement | null
@@ -47,7 +49,7 @@ export function MobileNav() {
         id="mobile-nav"
         role="dialog"
         aria-modal="true"
-        aria-label="模块导航"
+        aria-label={t('模块导航', 'Module navigation')}
         className="absolute inset-y-0 left-0 flex w-[282px] max-w-[86vw] animate-drawer-in flex-col border-r border-line/80 bg-shell shadow-panel"
       >
         <Sidebar variant="drawer" onNavigate={close} />
@@ -55,7 +57,7 @@ export function MobileNav() {
           ref={closeButton}
           type="button"
           onClick={close}
-          aria-label="关闭模块导航"
+          aria-label={t('关闭模块导航', 'Close navigation')}
           className="absolute right-2 top-3 flex size-8 items-center justify-center rounded-lg border border-line/70 text-ink-3 transition-colors hover:border-accent/40 hover:text-accent"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">

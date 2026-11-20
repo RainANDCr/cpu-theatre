@@ -1,4 +1,5 @@
 import type { InstructionTrace } from '../../core/seq/SEQProcessor'
+import { useI18n } from '../../i18n'
 import { cn } from '../../lib/cn'
 
 export interface CycleTimelineProps {
@@ -13,6 +14,7 @@ export interface CycleTimelineProps {
  * 没执行过的位置画虚线空槽——它是坐标轴，不是数据。
  */
 export function CycleTimeline({ history, onSeek, className }: CycleTimelineProps) {
+  const { t } = useI18n()
   const ticks = Math.max(18, history.length + 1)
 
   return (
@@ -27,7 +29,7 @@ export function CycleTimeline({ history, onSeek, className }: CycleTimelineProps
           type="button"
           onClick={() => onSeek?.(0)}
           className="flex h-7 w-9 shrink-0 items-center justify-center rounded border border-line/80 bg-panel/40 font-mono text-[9px] tabnums text-ink-3 transition-colors hover:text-ink"
-          title="回到初始状态"
+          title={t('回到初始状态', 'Back to the initial state')}
         >
           T0
         </button>
@@ -40,7 +42,7 @@ export function CycleTimeline({ history, onSeek, className }: CycleTimelineProps
               type="button"
               disabled={!filled}
               onClick={() => onSeek?.(index + 1)}
-              title={entry ? `${entry.text} @ ${entry.cycle}` : '尚未执行'}
+              title={entry ? `${entry.text} @ ${entry.cycle}` : t('尚未执行', 'not executed yet')}
               className={cn(
                 'flex h-7 w-9 shrink-0 items-center justify-center rounded border font-mono text-[9px] tabnums transition-colors',
                 filled
@@ -54,7 +56,7 @@ export function CycleTimeline({ history, onSeek, className }: CycleTimelineProps
         })}
       </div>
       <span className="hidden shrink-0 font-mono text-[9px] text-ink-3/60 sm:inline">
-        {history.length === 0 ? '尚无执行记录' : `${history.length} cycles`}
+        {history.length === 0 ? t('尚无执行记录', 'no records yet') : `${history.length} cycles`}
       </span>
     </div>
   )

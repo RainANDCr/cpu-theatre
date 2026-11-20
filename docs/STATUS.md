@@ -1,7 +1,7 @@
 # 项目现状（STATUS）
 
 > 这一页回答三个问题：**现在能做什么、验证到什么程度、哪些事还没做。**
-> 更新于 2026-11-20。历史过程写在 `PHASE-*.md`，那里面的数字是当时的快照，不随代码更新。
+> 更新于 2026-11-20（三语与双主题上线）。历史过程写在 `PHASE-*.md`，那里面的数字是当时的快照，不随代码更新。
 
 **在线地址**：<https://rainandcr.github.io/cpu-theatre/> —— 推送到 `main` 自动发布，不需要构建机。
 
@@ -11,7 +11,7 @@ CPU THEATRE 是一个可运行、可调试、可对拍的 Y86-64 处理器可视
 九个模块全部可用，引擎与界面严格分离，运行时零外部请求，Web 版与 Windows 免安装桌面版
 共用同一份构建产物。
 
-**当前质量门**：单元/组件 **304**（23 文件）、端到端 **30**（functional 26 + visual 4）、
+**当前质量门**：单元/组件 **311**（24 文件）、端到端 **35**（functional 31 + visual 4）、
 `tsc` 0 error、`oxlint` 0 warning、`dist` 3.5 MB。
 两条 GitHub Actions 流水线已在真实 runner 上跑通：`CI`（检查 + 测试 + 产物 E2E）
 与 `Deploy to GitHub Pages`。
@@ -28,7 +28,10 @@ CPU THEATRE 是一个可运行、可调试、可对拍的 Y86-64 处理器可视
 | Pipeline Lab | `/pipeline` | 五级流水线、转发/暂停/气泡、CPI |
 | Logic Lab | `/logic` | 门电路实验台、ALU 实验 |
 | Learning Center | `/learning` | 4 模块 13 知识点、自测与进度 |
-| Settings | `/settings` | 强调色、动效、网格、面板尺寸（本地持久化） |
+| Settings | `/settings` | 语言、主题、强调色、动效、网格、面板尺寸（本地持久化） |
+
+**全局能力**：界面语言三档（中文 / 英文 / 中英对照）、深色与浅色主题，
+都写进 `localStorage` 并在首屏绘制前应用；`<html lang>` 与 `data-theme` 随状态同步。
 
 **ISA**：27 条 Y86-64 指令（教材第 4 章），严格定长编码（1/2/9/10 字节）。
 **伪指令**：`.pos` / `.org` / `.align` / `.quad` / `.string`，详见 [ISA.md](ISA.md#7-汇编语法)。
@@ -60,6 +63,8 @@ CPU_BASE=cpu-theatre/ npm run build:pages      # 复现 Pages 产物（含 404.h
 | 高 DPI | 125%（1536×864）/150%（1280×720）+ 对应 DPR，不溢出、可操作 | `e2e/hidpi.spec.ts` |
 | 窄屏导航 | 390×844 抽屉开关、ESC 归还焦点、无横向溢出 | `e2e/mobile.spec.ts` |
 | 桌面外壳 | 首页渲染 / Monaco 出 5 行 / 深链回落 index.html | `electron/main.cjs --smoke` |
+| 三语结构 | 三档语言下导航项数量不变；双语片段带 `lang="en"`；`html[lang]` 同步 | `tests/ui/i18n-theme.test.tsx`、`e2e/i18n-theme.spec.ts` |
+| 主题对比度 | 浅色主题正文 ≥ 4.5:1；半透明面板逐层合成后再算 | `e2e/i18n-theme.spec.ts` |
 | Pages 子路径 | 资源前缀、深链 404 回落、Monaco 在 `/<repo>/` 下可用 | `scripts/pages-postbuild.mjs` + 部署前产物校验 |
 
 ### 发布
@@ -90,7 +95,10 @@ npm run preview:pages     # http://localhost:4183/cpu-theatre/
 6. **Monaco 仍是最重的懒加载块**：2.7 MB（gzip 697 KB）。已从 `editor.main` 换成
    `editor.api` + 5 条必要贡献，再往下砍会开始损失编辑器手感。
 7. **Tauri 方案未实施**（3–6 MB vs 363 MB），只有配置思路记录在 `WINDOWS.md`。
-8. **GitHub Pages 在国内网络下不稳。** 站点本身不需要后端，但 `*.github.io` 的可达性与速度
+8. **课程正文仍是中文。** 语言层覆盖了全部界面文案（导航、按钮、表头、状态、空态、
+   设置项、页面标题与说明），但 Learning Center 的知识点长文（`src/content/learning.ts`）
+   是按中文撰写的教学材料，尚未提供英文版本——切到英文时这一块会如实显示中文原文。
+9. **GitHub Pages 在国内网络下不稳。** 站点本身不需要后端，但 `*.github.io` 的可达性与速度
    取决于线路：本机冷缓存首次打开编辑器耗时 65 s（Monaco 2.7 MB），刷新后走 ETag 复用。
    要稳定给国内访问，需要自定义域名 + 国内可用的 CDN，或改用其它静态托管。
 

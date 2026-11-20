@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { T, useI18n } from '../../i18n'
 import type { Memory } from '../../core/cpu/Memory'
 import { asWord, type Word } from '../../core/cpu/word'
 import { cn } from '../../lib/cn'
@@ -29,6 +30,7 @@ function parseAddress(text: string): number | null {
  * 而不是永远停在 0x0000。手动跳转一次就切到固定窗口，不再被 PC 拽走。
  */
 export function MemoryPanel({ memory = null, anchor = null, highlight = null, className }: MemoryPanelProps) {
+  const { t } = useI18n()
   const [manualBase, setManualBase] = useState(0)
   const [follow, setFollow] = useState(true)
   const [jumpText, setJumpText] = useState('')
@@ -56,7 +58,7 @@ export function MemoryPanel({ memory = null, anchor = null, highlight = null, cl
           onKeyDown={(event) => {
             if (event.key === 'Enter') jump()
           }}
-          aria-label="跳转地址"
+          aria-label={t('跳转地址', 'Jump to address')}
           placeholder="0x0000"
           className="h-6 w-[74px] rounded border border-line/80 bg-void/50 px-1.5 font-mono text-[10px] text-ink placeholder:text-ink-3/50 focus:border-accent/50 focus:outline-none"
         />
@@ -65,7 +67,7 @@ export function MemoryPanel({ memory = null, anchor = null, highlight = null, cl
           onClick={jump}
           className="h-6 rounded border border-line/80 px-2 font-mono text-[10px] text-ink-2 transition-colors hover:border-accent/40 hover:text-accent"
         >
-          跳转
+          <T zh="跳转" en="Go" />
         </button>
         <button
           type="button"
@@ -78,7 +80,7 @@ export function MemoryPanel({ memory = null, anchor = null, highlight = null, cl
               : 'border-line/80 text-ink-3 hover:text-ink-2',
           )}
         >
-          跟随 PC
+          <T zh="跟随 PC" en="Follow PC" />
         </button>
         <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3/70">
           64 KiB · LE
@@ -170,8 +172,14 @@ export function MemoryPanel({ memory = null, anchor = null, highlight = null, cl
 
       <p className="shrink-0 border-t border-line/60 px-2.5 py-1.5 text-[10px] leading-relaxed text-ink-3">
         {memory
-          ? '字节按小端序显示：一个字的最低位在最低地址。本拍访存的 8 个字节以橙色标出。'
-          : '尚未装载程序。装载后这里显示真实内存内容。'}
+          ? t(
+              '字节按小端序显示：一个字的最低位在最低地址。本拍访存的 8 个字节以橙色标出。',
+              'Bytes are little-endian: the least significant byte sits at the lowest address. The 8 bytes touched this cycle are marked in amber.',
+            )
+          : t(
+              '尚未装载程序。装载后这里显示真实内存内容。',
+              'No program loaded. Real memory contents appear here after loading.',
+            )}
       </p>
     </div>
   )

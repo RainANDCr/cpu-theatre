@@ -17,6 +17,7 @@ import { Tabs } from '../components/ui/Tabs'
 import { useStagePlayback } from '../hooks/useStagePlayback'
 import { useCpuStore } from '../store/cpuStore'
 import { useEditorStore } from '../store/editorStore'
+import { T, useI18n } from '../i18n'
 
 type ObserverTab = 'registers' | 'memory'
 
@@ -44,6 +45,7 @@ export default function Simulator() {
   const breakpoints = useCpuStore((s) => s.breakpoints)
   const toggleBreakpointAtLine = useCpuStore((s) => s.toggleBreakpointAtLine)
 
+  const { t } = useI18n()
   const [selectedModule, setSelectedModule] = useState<StageModuleId | null>('alu')
   const [tab, setTab] = useState<ObserverTab>('registers')
 
@@ -70,7 +72,7 @@ export default function Simulator() {
   return (
     <div className={`flex ${WORKSPACE_HEIGHT} min-h-[540px] flex-col overflow-hidden`}>
       {/* 工作台没有可见大标题，但每个页面仍需要一个 h1 供读屏与语义使用 */}
-      <h1 className="sr-only">CPU Simulator · Y86-64 顺序执行数据通路</h1>
+      <h1 className="sr-only">{t('CPU Simulator · Y86-64 顺序执行数据通路', 'CPU Simulator · Y86-64 sequential datapath')}</h1>
       <ExecutionControls />
 
       {error && (
@@ -89,7 +91,7 @@ export default function Simulator() {
               actions={
                 <>
                   <Badge tone={stale ? 'amber' : engineReady ? 'green' : 'slate'}>
-                    {stale ? 'stale' : engineReady ? 'loaded' : '未装载'}
+                    {stale ? 'stale' : engineReady ? 'loaded' : t('未装载', 'not loaded')}
                   </Badge>
                   {breakpoints.length > 0 && (
                     <Badge tone="red">{breakpoints.length} bp</Badge>
@@ -100,7 +102,7 @@ export default function Simulator() {
                     className="inline-flex h-6 items-center gap-1 rounded border border-line-2 px-1.5 font-mono text-[9.5px] uppercase tracking-[0.1em] text-ink-2 transition-colors hover:border-accent/45 hover:text-accent"
                   >
                     <PackageCheck size={11} />
-                    装载
+                    <T zh="装载" en="Load" />
                   </button>
                 </>
               }
@@ -113,12 +115,14 @@ export default function Simulator() {
                 breakpointLines={breakpointLines}
                 activeLine={activeLine}
                 onToggleBreakpointLine={toggleBreakpointAtLine}
-                ariaLabel="Y86-64 源码"
+                ariaLabel={t('Y86-64 源码', 'Y86-64 source')}
               />
             </div>
             <div className="flex h-7 shrink-0 items-center justify-between border-t border-line/70 px-2.5 font-mono text-[9.5px] text-ink-3">
               <span className="tabnums">{source.replace(/\n$/, '').split('\n').length} lines</span>
-              <span className="text-ink-3/60">点行号下断点 · Ctrl+Enter 装载</span>
+              <span className="text-ink-3/60">
+                <T zh="点行号下断点 · Ctrl+Enter 装载" en="Click a gutter line for a breakpoint · Ctrl+Enter to load" />
+              </span>
             </div>
           </div>
         }
@@ -132,7 +136,7 @@ export default function Simulator() {
                 {trace ? (playback.stage ?? 'live') : 'idle'}
               </Badge>
               <span className="ml-auto hidden font-mono text-[9px] text-ink-3/60 sm:inline">
-                点击模块查看输入输出
+                <T zh="点击模块查看输入输出" en="Click a module for its inputs and outputs" />
               </span>
             </div>
             <div className="min-h-0 flex-1 p-1.5">
@@ -149,7 +153,7 @@ export default function Simulator() {
         right={
           <div className="flex min-h-0 flex-1 flex-col bg-abyss/30">
             <Tabs<ObserverTab>
-              label="观察器"
+              label={t('观察器', 'Observer')}
               value={tab}
               onChange={setTab}
               items={[
@@ -160,7 +164,7 @@ export default function Simulator() {
             {tab === 'registers' ? (
               <div
                 role="tabpanel"
-                aria-label="寄存器"
+                aria-label={t('寄存器', 'Registers')}
                 className="flex min-h-0 flex-1 flex-col overflow-hidden"
               >
                 <RegisterTable values={registers} changed={changed} className="min-h-0 flex-1" />
@@ -169,7 +173,7 @@ export default function Simulator() {
             ) : (
               <div
                 role="tabpanel"
-                aria-label="内存"
+                aria-label={t('内存', 'Memory')}
                 className="flex min-h-0 flex-1 flex-col overflow-hidden"
               >
                 <MemoryPanel

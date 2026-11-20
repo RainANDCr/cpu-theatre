@@ -12,6 +12,8 @@ import { TopBar } from './TopBar'
 
 export function AppShell() {
   const accent = useSettingsStore((state) => state.accent)
+  const theme = useSettingsStore((state) => state.theme)
+  const lang = useSettingsStore((state) => state.lang)
   const reduceMotion = useSettingsStore((state) => state.reduceMotion)
   const showGrid = useSettingsStore((state) => state.showGrid)
   const pathname = useLocation().pathname
@@ -25,6 +27,17 @@ export function AppShell() {
     document.documentElement.dataset.accent = accent
   }, [accent])
 
+  // 主题只换 <html data-theme>，颜色全部由 CSS 令牌决定，组件不需要知道当前是深色还是浅色
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+  }, [theme])
+
+  // 语言写进 <html lang>：影响朗读器发音、断词与中文标点的字体回退
+  useEffect(() => {
+    document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN'
+    document.documentElement.dataset.lang = lang
+  }, [lang])
+
   // 路由一变就收抽屉：用户已经完成选择，让面板继续挡着内容没有意义
   useEffect(() => {
     closeNav()
@@ -34,6 +47,7 @@ export function AppShell() {
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
       <div className="relative z-10 flex h-screen w-full overflow-hidden">
         <Sidebar />
+        {/* 顶栏以外的区域也要能被朗读器跳过重复导航 */}
         {!isWide && navOpen && <MobileNav />}
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar />

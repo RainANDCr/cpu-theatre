@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { T, useI18n } from '../i18n'
 import { ArrowRight, Check, CheckCircle2, CircleHelp, RotateCcw } from 'lucide-react'
 import { Badge } from '../components/ui/Badge'
 import { Panel } from '../components/ui/Panel'
@@ -42,7 +43,7 @@ function Demo({ demo }: { demo: SectionDemo }) {
           </div>
         ))}
         <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.12em] text-ink-3/60">
-          一拍走完
+          <T zh="一拍走完" en="one cycle" />
         </span>
       </div>
     )
@@ -83,6 +84,7 @@ function Demo({ demo }: { demo: SectionDemo }) {
 }
 
 function SectionView({ section, index }: { section: LearningSection; index: number }) {
+  const { t } = useI18n()
   const completed = useLearningStore((state) => state.completed.includes(section.id))
   const toggle = useLearningStore((state) => state.toggleSection)
 
@@ -93,7 +95,7 @@ function SectionView({ section, index }: { section: LearningSection; index: numb
           type="button"
           onClick={() => toggle(section.id)}
           aria-pressed={completed}
-          aria-label={completed ? '标记为未读' : '标记为已读'}
+          aria-label={completed ? t('标记为未读', 'Mark unread') : t('标记为已读', 'Mark read')}
           className={cn(
             'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors',
             completed
@@ -121,7 +123,7 @@ function SectionView({ section, index }: { section: LearningSection; index: numb
               to={section.lab.to}
               className="mt-2 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.12em] text-accent hover:underline"
             >
-              实验：{section.lab.label}
+              {t('实验', 'Lab')}: {section.lab.label}
               <ArrowRight size={11} />
             </Link>
           )}
@@ -132,11 +134,12 @@ function SectionView({ section, index }: { section: LearningSection; index: numb
 }
 
 function QuizView({ module }: { module: LearningModule }) {
+  const { t } = useI18n()
   const answers = useLearningStore((state) => state.answers)
   const answer = useLearningStore((state) => state.answer)
 
   return (
-    <section aria-label="自测" className="border-t border-line/60 bg-void/20 px-4 py-4">
+    <section aria-label={t('自测', 'Self-check')} className="border-t border-line/60 bg-void/20 px-4 py-4">
       <div className="flex items-center gap-2">
         <CircleHelp size={13} className="text-ctrl" />
         <span className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink-3">
@@ -184,7 +187,7 @@ function QuizView({ module }: { module: LearningModule }) {
               </div>
               {answered && (
                 <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-3">
-                  {chosen === question.answer ? '✓ 正确。' : '✗ 再想想。'}
+                  {chosen === question.answer ? t('✓ 正确。', '✓ Correct.') : t('✗ 再想想。', '✗ Not quite.')}
                   {question.explanation}
                 </p>
               )}
@@ -197,6 +200,7 @@ function QuizView({ module }: { module: LearningModule }) {
 }
 
 export default function LearningCenter() {
+  const { t } = useI18n()
   const [activeId, setActiveId] = useState(LEARNING_MODULES[0]!.id)
   const completed = useLearningStore((state) => state.completed)
   const answers = useLearningStore((state) => state.answers)
@@ -223,20 +227,25 @@ export default function LearningCenter() {
         <Badge tone="green" dot>
           self-paced
         </Badge>
-        <Badge tone="slate">进度保存在本地</Badge>
+        <Badge tone="slate">
+          <T zh="进度保存在本地" en="progress saved locally" />
+        </Badge>
       </div>
 
       <h1 className="mt-3 text-[30px] font-semibold tracking-[-0.02em] text-ink">Learning Center</h1>
       <p className="mt-2 max-w-[720px] text-[12.5px] leading-relaxed text-ink-2">
-        四个模块，从指令集到流水线。每个知识点都是「解释 → 演示 → 示例 → 实验 → 自测」，
-        没有需要背诵的段落——看不懂就回到实验里拨一下开关。
+        <T
+          block
+          zh="四个模块，从指令集到流水线。每个知识点都是「解释 → 演示 → 示例 → 实验 → 自测」，没有需要背诵的段落——看不懂就回到实验里拨一下开关。"
+          en="Four modules, from the instruction set to the pipeline. Every topic follows explain → demo → example → lab → self-check; nothing needs memorising — flip a switch in the lab when it does not click."
+        />
       </p>
 
       <div className="mt-5 flex flex-wrap items-center gap-4 rounded-xl border border-line/80 bg-panel/50 px-4 py-3">
         <div className="flex items-baseline gap-2">
           <span className="font-mono text-[22px] leading-none text-accent">{percent}%</span>
           <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink-3">
-            {done}/{TOTAL_SECTIONS} 已读
+            {done}/{TOTAL_SECTIONS} {t('已读', 'read')}
           </span>
         </div>
         <div className="h-1.5 min-w-[140px] flex-1 overflow-hidden rounded-full bg-line/70">
@@ -246,7 +255,7 @@ export default function LearningCenter() {
           />
         </div>
         <span className="font-mono text-[10px] text-ink-3">
-          自测 {correctCount}/{answeredCount || 0} 正确
+          {t('自测', 'Self-check')} {correctCount}/{answeredCount || 0} {t('正确', 'correct')}
         </span>
         <button
           type="button"
@@ -254,12 +263,12 @@ export default function LearningCenter() {
           className="inline-flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[0.12em] text-ink-3 transition-colors hover:text-err"
         >
           <RotateCcw size={11} />
-          重置进度
+          <T zh="重置进度" en="Reset progress" />
         </button>
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[240px_1fr]">
-        <nav className="space-y-1.5" aria-label="知识模块">
+        <nav className="space-y-1.5" aria-label={t('知识模块', 'Knowledge modules')}>
           {LEARNING_MODULES.map((module) => {
             const activeModule = module.id === activeId
             const moduleDone = module.sections.filter((section) =>

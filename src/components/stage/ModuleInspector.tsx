@@ -1,4 +1,5 @@
 import { toHex } from '../../core/cpu/word'
+import { useI18n } from '../../i18n'
 import { formatValue } from '../../core/isa/format'
 import { registerName } from '../../core/isa/registers'
 import type { InstructionTrace } from '../../core/seq/SEQProcessor'
@@ -28,7 +29,7 @@ function moduleValues(moduleId: StageModuleId, trace: InstructionTrace | null): 
           ]
         : [['PC', toHex(trace.pc, 4)]]
     case 'imem':
-      if (!trace.fetch.ok) return [['取指', trace.fetch.message ?? '失败']]
+      if (!trace.fetch.ok) return [['fetch', trace.fetch.message ?? 'fault']]
       return [
         ['icode', trace.fetch.icode.toString(16).toUpperCase()],
         ['rA/rB', `${reg(trace.fetch.rA)}/${reg(trace.fetch.rB)}`],
@@ -56,12 +57,12 @@ function moduleValues(moduleId: StageModuleId, trace: InstructionTrace | null): 
         ['dstE', reg(trace.writeback?.dstE)],
       ]
     case 'dmem':
-      if (!trace.memory || trace.memory.kind === 'none') return [['访问', 'none']]
+      if (!trace.memory || trace.memory.kind === 'none') return [['access', 'none']]
       return [
         ['kind', trace.memory.kind],
         ['addr', trace.memory.address === null ? '—' : toHex(trace.memory.address, 4)],
         [
-          trace.memory.kind === 'write' ? '写' : '读',
+          trace.memory.kind === 'write' ? 'W' : 'R',
           formatValue((trace.memory.kind === 'write' ? trace.memory.writeValue : trace.memory.readValue) ?? 0n),
         ],
       ]
@@ -83,10 +84,14 @@ function moduleValues(moduleId: StageModuleId, trace: InstructionTrace | null): 
  * 后者没有数据时显示破折号：它提醒使用者这里是空的，而不是零。
  */
 export function ModuleInspector({ moduleId, trace = null }: ModuleInspectorProps) {
+  const { t } = useI18n()
   if (!moduleId) {
     return (
       <div className="shrink-0 border-t border-line/70 px-3 py-2.5 text-[11px] text-ink-3">
-        点击数据通路中的任一模块，查看它的功能、输入与输出。
+        {t(
+          '点击数据通路中的任一模块，查看它的功能、输入与输出。',
+          'Pick any module in the datapath to see its role, inputs and outputs.',
+        )}
       </div>
     )
   }
@@ -104,7 +109,7 @@ export function ModuleInspector({ moduleId, trace = null }: ModuleInspectorProps
         <span className="font-mono text-[9.5px] text-ink-3">{module?.title}</span>
         <div className="ml-auto flex max-w-[62%] items-center gap-2 overflow-hidden font-mono text-[9px]">
           {values.length === 0 ? (
-            <span className="text-ink-3/60">当前值 —</span>
+            <span className="text-ink-3/60">{t('当前值 —', 'current —')}</span>
           ) : (
             values.map(([key, value]) => (
               <span key={key} className="whitespace-nowrap">
@@ -120,7 +125,9 @@ export function ModuleInspector({ moduleId, trace = null }: ModuleInspectorProps
 
       <div className="mt-1.5 grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
         <div>
-          <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">输入</div>
+          <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
+            {t('输入', 'in')}
+          </div>
           <ul className="mt-0.5">
             {doc.inputs.map((item) => (
               <li key={item} className="text-[10.5px] leading-snug text-ink-2">
@@ -131,7 +138,9 @@ export function ModuleInspector({ moduleId, trace = null }: ModuleInspectorProps
           </ul>
         </div>
         <div>
-          <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">输出</div>
+          <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
+            {t('输出', 'out')}
+          </div>
           <ul className="mt-0.5">
             {doc.outputs.map((item) => (
               <li key={item} className="text-[10.5px] leading-snug text-ink-2">

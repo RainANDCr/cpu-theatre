@@ -55,6 +55,13 @@
 :root {
   --accent: #4d9fff;
   color-scheme: dark;
+  /* 双语模式下英文片段的淡化比例：78% 混色后仍有 ~7:1 对比度 */
+  --bi-mix: 78%;
+  --scrollbar-thumb: #1f2a3f;
+  --scrollbar-thumb-hover: #2c3a55;
+  --grid-line: rgb(255 255 255 / 0.04);
+  --glow-a: 14%;
+  --glow-b: 0.1;
 }
 :root[data-accent="purple"] {
   --accent: #a970ff;
@@ -64,6 +71,60 @@
 }
 :root[data-accent="amber"] {
   --accent: #ffb457;
+}
+
+/* ============================================================
+   浅色主题
+   只覆盖语义令牌的**取值**，不新增类名：组件里写的是 bg-panel / text-ink-2，
+   因此换主题不需要动任何一个组件。
+   硬件语义色在浅底上必须压暗，否则 4.5:1 的正文对比度达不到
+   （原来的 #2ee6d6 / #ffb457 是给深色底发光用的）。
+   ============================================================ */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-void: #eef2f8;
+  --color-abyss: #f6f8fc;
+  --color-shell: #ffffff;
+  --color-panel: #ffffff;
+  --color-panel-2: #f3f6fc;
+  --color-line: #d8e1ee;
+  --color-line-2: #b9c6da;
+  --color-ink: #0b1424;
+  --color-ink-2: #3b4b64;
+  --color-ink-3: #5b6b85;
+
+  --color-bus: #1668d6;
+  --color-ctrl: #7a3ecf;
+  --color-reg: #0d8d82;
+  --color-alu: #a35f00;
+  --color-ok: #0a7c49;
+  --color-err: #c31f38;
+  --color-warn: #8f5c07;
+
+  --shadow-panel:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.9),
+    0 16px 36px -30px rgb(13 30 58 / 0.55);
+
+  /* 用「字号 + 细分隔线」表达层级，颜色只轻微淡化：
+     88% 实测 4.06:1 不达标，96% 才稳定过 4.5（浅底上白纸黑字的余量本就比深底小） */
+  --bi-mix: 96%;
+  --scrollbar-thumb: #c2cfe2;
+  --scrollbar-thumb-hover: #a8b8d0;
+  --grid-line: rgb(13 30 58 / 0.07);
+  --glow-a: 10%;
+  --glow-b: 0.06;
+
+  --accent: #1d6fe0;
+}
+:root[data-theme="light"][data-accent="purple"] {
+  --accent: #7333c9;
+}
+:root[data-theme="light"][data-accent="cyan"] {
+  --accent: #0b7d84;
+}
+:root[data-theme="light"][data-accent="amber"] {
+  --accent: #9a5d00;
 }
 
 @keyframes pulse-soft {
@@ -140,15 +201,20 @@
     background-image:
       radial-gradient(
         900px 520px at 8% -10%,
-        color-mix(in oklab, var(--accent) 14%, transparent),
+        color-mix(in oklab, var(--accent) var(--glow-a), transparent),
         transparent 68%
       ),
-      radial-gradient(760px 460px at 96% -6%, rgb(169 112 255 / 0.1), transparent 70%);
+      radial-gradient(
+        760px 460px at 96% -6%,
+        color-mix(in oklab, var(--color-ctrl) var(--glow-b), transparent),
+        transparent 70%
+      );
   }
 
   ::selection {
     background: color-mix(in oklab, var(--accent) 34%, transparent);
-    color: #fff;
+    /* 跟着主题走：浅色主题下白字会直接消失 */
+    color: var(--color-ink);
   }
 
   :focus-visible {
@@ -158,20 +224,20 @@
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #253147 transparent;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
   }
   *::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
   *::-webkit-scrollbar-thumb {
-    background: #1f2a3f;
+    background: var(--scrollbar-thumb);
     border: 2px solid transparent;
     background-clip: content-box;
     border-radius: 999px;
   }
   *::-webkit-scrollbar-thumb:hover {
-    background: #2c3a55;
+    background: var(--scrollbar-thumb-hover);
     background-clip: content-box;
   }
   *::-webkit-scrollbar-track {
@@ -183,9 +249,46 @@
   /* 图纸网格：暗示这是一块实验台，而非一张海报 */
   .grid-veil {
     background-image:
-      linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size: 44px 44px;
+  }
+
+  /* ---------- 双语排版 ----------
+     同一份标记在三种语言下通用：单语时只有一个 span，双语时多一个次级片段。
+     双语片段用「主行 + 次级行」的关系表达对应，而不是把两种语言平铺成一句话——
+     平铺会让「哪句属于哪句」变得不可判断。 */
+  .ct-bi {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.4em;
+  }
+
+  .ct-bi-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+  }
+
+  .ct-bi-en {
+    font-family: var(--font-sans);
+    font-size: max(0.82em, 10px);
+    font-weight: 400;
+    letter-spacing: 0.005em;
+    line-height: 1.4;
+    color: color-mix(in oklab, currentColor var(--bi-mix), transparent);
+  }
+
+  /* 段落级对照：英文前加一道细竖线，视觉上钉住「这是上一句的译文」 */
+  .ct-bi-block > .ct-bi-en {
+    padding-left: 0.55em;
+    border-left: 1px solid color-mix(in oklab, currentColor 22%, transparent);
+  }
+
+  /* 等宽界面里的缩写（如 Readout 的标签）不换行，避免双行把顶栏撑高 */
+  .ct-bi-inline-tight {
+    flex-wrap: nowrap;
   }
 
   .mask-fade {

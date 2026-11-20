@@ -5,6 +5,7 @@ import type { Diagnostic } from '../../core/isa/diagnostics'
 import { formatAddress, formatBytes } from '../../core/isa/format'
 import { asSigned } from '../../core/cpu/word'
 import { cn } from '../../lib/cn'
+import { useI18n } from '../../i18n'
 import { Tabs } from '../ui/Tabs'
 
 export type OutputTab = 'listing' | 'symbols' | 'diagnostics'
@@ -41,6 +42,7 @@ export function ProgramOutput({
   onTabChange,
   className,
 }: ProgramOutputProps) {
+  const { t } = useI18n()
   const errorCount = result?.diagnostics.filter((d) => d.severity === 'error').length ?? 0
   const warningCount = result?.diagnostics.filter((d) => d.severity === 'warning').length ?? 0
 
@@ -69,14 +71,14 @@ export function ProgramOutput({
         'flex min-h-0 flex-col border-t border-line/80 bg-shell/45',
         className,
       )}
-      aria-label="汇编输出"
+      aria-label={t('汇编输出', 'Assembly output')}
     >
       <div className="flex items-center justify-between gap-3 border-b border-line/60 pr-3">
         <Tabs
           value={tab}
           items={items}
           onChange={onTabChange}
-          label="汇编输出视图"
+          label={t('汇编输出视图', 'Assembly output views')}
           className="border-b-0"
         />
         <div className="flex shrink-0 items-center gap-2 font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink-3">
@@ -124,14 +126,18 @@ export function ProgramOutput({
 }
 
 function EmptyOutput() {
+  const { t } = useI18n()
   return (
     <div className="flex h-full items-center justify-center px-6 py-8 text-center">
       <div>
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-3">not compiled</p>
         <p className="mt-2 max-w-md text-[11.5px] leading-relaxed text-ink-3">
-          按 <kbd className="rounded border border-line-2 px-1 font-mono text-[10px]">Ctrl</kbd>+
+          {t('按', 'Press')} <kbd className="rounded border border-line-2 px-1 font-mono text-[10px]">Ctrl</kbd>+
           <kbd className="rounded border border-line-2 px-1 font-mono text-[10px]">Enter</kbd>{' '}
-          或点工具栏的「汇编」，这里会列出每条指令的地址、长度与机器码。
+          {t(
+            '或点工具栏的「汇编」，这里会列出每条指令的地址、长度与机器码。',
+            'or hit Assemble in the toolbar to list address, length and machine code for every instruction.',
+          )}
         </p>
       </div>
     </div>
@@ -139,8 +145,9 @@ function EmptyOutput() {
 }
 
 function ListingTable({ result }: { result: AssembleResult }) {
+  const { t } = useI18n()
   if (result.listing.length === 0) {
-    return <Notice>程序里没有可汇编的指令。</Notice>
+    return <Notice>{t('程序里没有可汇编的指令。', 'No assemblable instructions in this program.')}</Notice>
   }
 
   return (
@@ -163,7 +170,7 @@ function ListingTable({ result }: { result: AssembleResult }) {
               key={`${row.address}-${row.line}`}
               className={cn(
                 'border-t border-line/40',
-                row.valid ? 'hover:bg-white/[0.02]' : 'bg-err/[0.06]',
+                row.valid ? 'hover:bg-ink/[0.03]' : 'bg-err/[0.06]',
                 isData && 'bg-bus/[0.05]',
               )}
             >
@@ -205,8 +212,9 @@ function ListingTable({ result }: { result: AssembleResult }) {
 }
 
 function SymbolTable({ result }: { result: AssembleResult }) {
+  const { t } = useI18n()
   if (result.labels.length === 0) {
-    return <Notice>这段程序没有定义标签。</Notice>
+    return <Notice>{t('这段程序没有定义标签。', 'This program defines no labels.')}</Notice>
   }
 
   return (
@@ -236,11 +244,12 @@ function SymbolTable({ result }: { result: AssembleResult }) {
 }
 
 function DiagnosticList({ diagnostics }: { diagnostics: Diagnostic[] }) {
+  const { t } = useI18n()
   if (diagnostics.length === 0) {
     return (
       <div className="flex items-center gap-2 px-3 py-3 text-[11.5px] text-ok">
         <CheckCircle2 size={13} />
-        汇编通过，没有错误或警告。
+        {t('汇编通过，没有错误或警告。', 'Assembled cleanly — no errors or warnings.')}
       </div>
     )
   }

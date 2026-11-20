@@ -8,6 +8,7 @@ import { isFault } from '../../core/cpu/Status'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { ChipMark } from './ChipMark'
+import { T, useI18n } from '../../i18n'
 
 export interface SidebarProps {
   /** rail = 常驻栏（桌面）；drawer = 窄屏抽屉里的那一份 */
@@ -29,6 +30,7 @@ export function Sidebar({ variant = 'rail', onNavigate }: SidebarProps) {
   const collapsed = isDrawer ? false : storedCollapsed || !isWide || !isRoomForLabels
   /** 窄屏是强制收起，此时不该给一个点了没反应的按钮 */
   const canToggle = !isDrawer && isWide && isRoomForLabels
+  const { t } = useI18n()
 
   return (
     <aside
@@ -38,13 +40,13 @@ export function Sidebar({ variant = 'rail', onNavigate }: SidebarProps) {
         // 小于 1024 时常驻栏让位给抽屉，否则会白白吃掉 78px 的内容宽度
         !isDrawer && 'hidden lg:flex',
       )}
-      aria-label={isDrawer ? '模块导航（抽屉）' : '模块导航'}
+      aria-label={isDrawer ? t('模块导航（抽屉）', 'Module navigation (drawer)') : t('模块导航', 'Module navigation')}
     >
       <Link
         to="/"
         onClick={onNavigate}
         className={cn(
-          'flex h-16 items-center gap-3 border-b border-line/70 px-4 transition-colors hover:bg-white/[0.02]',
+          'flex h-16 items-center gap-3 border-b border-line/70 px-4 transition-colors hover:bg-ink/[0.03]',
           collapsed && 'justify-center px-0',
         )}
       >
@@ -74,10 +76,10 @@ export function Sidebar({ variant = 'rail', onNavigate }: SidebarProps) {
               aria-current={isActive ? 'page' : undefined}
               onClick={onNavigate}
               className={cn(
-                'group relative flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-[12.5px] transition-colors',
+                'group relative flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 py-1 text-[12.5px] leading-tight transition-colors',
                 isActive
                   ? 'bg-accent/[0.09] text-ink'
-                  : 'text-ink-3 hover:bg-white/[0.035] hover:text-ink-2',
+                  : 'text-ink-3 hover:bg-ink/[0.045] hover:text-ink-2',
                 collapsed && 'justify-center px-0',
               )}
             >
@@ -95,7 +97,9 @@ export function Sidebar({ variant = 'rail', onNavigate }: SidebarProps) {
               />
               {!collapsed && (
                 <>
-                  <span className="flex-1 truncate">{module.label}</span>
+                  <span className="flex-1 truncate">
+                    <T zh={module.labelZh} en={module.label} />
+                  </span>
                   <span className="font-mono text-[9.5px] tabnums text-ink-3/70">
                     {String(index + 1).padStart(2, '0')}
                   </span>
@@ -113,14 +117,18 @@ export function Sidebar({ variant = 'rail', onNavigate }: SidebarProps) {
           type="button"
           onClick={toggleSidebar}
           className={cn(
-            'flex h-8 w-full items-center gap-2 rounded-lg px-2 text-[11px] text-ink-3 transition-colors hover:bg-white/[0.04] hover:text-ink-2',
+            'flex h-8 w-full items-center gap-2 rounded-lg px-2 text-[11px] text-ink-3 transition-colors hover:bg-ink/[0.05] hover:text-ink-2',
             collapsed && 'justify-center px-0',
           )}
-          aria-label={collapsed ? '展开侧栏' : '收起侧栏'}
-          title={collapsed ? '展开侧栏' : '收起侧栏'}
+          aria-label={collapsed ? t('展开侧栏', 'Expand sidebar') : t('收起侧栏', 'Collapse sidebar')}
+          title={collapsed ? t('展开侧栏', 'Expand sidebar') : t('收起侧栏', 'Collapse sidebar')}
         >
           {collapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
-          {!collapsed && <span>收起侧栏</span>}
+          {!collapsed && (
+            <span>
+              <T zh="收起侧栏" en="Collapse sidebar" />
+            </span>
+          )}
         </button>
         )}
       </div>
@@ -153,16 +161,17 @@ function EngineCard() {
   const halted = isPipeline ? pipeStat === 'HLT' : engineState === 'halted'
   const fault = isPipeline ? isFault(pipeStat) : engineState === 'fault'
   const engineName = isPipeline ? 'PIPE' : 'SEQ'
+  const { t } = useI18n()
 
   const title = running
-    ? 'Engine running'
+    ? t('引擎运行中', 'Engine running')
     : halted
-      ? 'Program halted'
+      ? t('程序已停机', 'Program halted')
       : fault
-        ? 'Program fault'
+        ? t('程序异常', 'Program fault')
         : engineReady
-          ? 'Program loaded'
-          : 'No program'
+          ? t('程序已装载', 'Program loaded')
+          : t('未装载程序', 'No program')
 
   const dot = running || halted ? 'bg-ok' : fault ? 'bg-err' : engineReady ? 'bg-accent' : 'bg-alu'
 
@@ -177,10 +186,13 @@ function EngineCard() {
       </div>
       <p className="mt-1 text-[10.5px] leading-snug text-ink-3">
         {engineReady
-          ? `${engineName} · cycle ${cycle ?? 0}${halted ? ' · 已停机' : ''}`
+          ? `${engineName} · cycle ${cycle ?? 0}${halted ? ` · ${t('已停机', 'halted')}` : ''}`
           : isPipeline
-            ? '在 Pipeline Lab 里点「装载」即可开始。'
-            : '在 CPU Simulator 里点「单步」即可装载并执行。'}
+            ? t('在 Pipeline Lab 里点「装载」即可开始。', 'Press Load in Pipeline Lab to begin.')
+            : t(
+                '在 CPU Simulator 里点「单步」即可装载并执行。',
+                'Press Step in CPU Simulator to load and execute.',
+              )}
       </p>
     </div>
   )

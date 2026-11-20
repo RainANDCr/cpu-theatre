@@ -19,6 +19,7 @@ const monaco = monacoEsm as unknown as MonacoApi
 
 export const Y86_LANGUAGE_ID = 'y86'
 export const THEME_ID = 'cpu-theatre'
+export const THEME_LIGHT_ID = 'cpu-theatre-light'
 
 /** 从 ISA 表派生，不在编辑器里另抄一份指令名单 */
 const MNEMONICS = ALL_MNEMONICS.join('|')
@@ -86,6 +87,39 @@ function configure(api: MonacoApi): void {
       'editorIndentGuide.background1': '#131e30',
       'editorWidget.background': '#0b1220',
       'editorWidget.border': '#1a2438',
+    },
+  })
+
+  /*
+   * 亮色主题。不是把深色反相：Monaco 的 `vs` 底子会把行号、选中区、滚动条都换一套，
+   * 而语法色需要对白底重新取对比度（原来的 #2ee6d6 在白色上只有 1.5:1）。
+   */
+  api.editor.defineTheme(THEME_LIGHT_ID, {
+    base: 'vs',
+    inherit: true,
+    rules: [
+      { token: 'keyword', foreground: '7a3ecf' },
+      { token: 'keyword.directive', foreground: 'b8217a' },
+      { token: 'string', foreground: '0a7c49' },
+      { token: 'variable', foreground: '0b7d84' },
+      { token: 'number', foreground: '8f5c07' },
+      { token: 'number.hex', foreground: '8f5c07' },
+      { token: 'type.identifier', foreground: '1668d6' },
+      { token: 'comment', foreground: '5b6b85', fontStyle: 'italic' },
+      { token: 'delimiter', foreground: '43536b' },
+      { token: 'identifier', foreground: '0b1424' },
+    ],
+    colors: {
+      'editor.background': '#ffffff',
+      'editor.foreground': '#0b1424',
+      'editorLineNumber.foreground': '#8a99b0',
+      'editorLineNumber.activeForeground': '#3b4b64',
+      'editor.lineHighlightBackground': '#f1f5fc',
+      'editor.selectionBackground': '#cfe0fb',
+      'editorCursor.foreground': '#1d6fe0',
+      'editorIndentGuide.background1': '#e3eaf5',
+      'editorWidget.background': '#ffffff',
+      'editorWidget.border': '#d8e1ee',
     },
   })
 

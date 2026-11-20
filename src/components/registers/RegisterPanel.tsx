@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { T, useI18n } from '../../i18n'
 import type { ConditionCodes } from '../../core/cpu/ConditionCodes'
 import type { Stat } from '../../core/cpu/Status'
 import { toBin, toDec, toHex, type Word } from '../../core/cpu/word'
@@ -23,6 +24,7 @@ export interface RegisterTableProps {
  * 完整 64 位在选中后的位模式栏里给出，那里才需要对齐。
  */
 export function RegisterTable({ values = null, changed, className }: RegisterTableProps) {
+  const { t } = useI18n()
   const [selected, setSelected] = useState<number | null>(null)
   const selectedValue = selected !== null && values ? values[selected] ?? null : null
 
@@ -47,7 +49,7 @@ export function RegisterTable({ values = null, changed, className }: RegisterTab
               onClick={() => setSelected(active ? null : index)}
               className={cn(
                 'grid w-full grid-cols-[auto_1fr_96px] items-center gap-2 px-2.5 py-[3px] text-left font-mono text-[11px] transition-colors',
-                active ? 'bg-accent/10' : 'hover:bg-white/[0.03]',
+                active ? 'bg-accent/10' : 'hover:bg-ink/[0.04]',
                 isChanged && !active && 'bg-ok/[0.07]',
               )}
             >
@@ -76,11 +78,11 @@ export function RegisterTable({ values = null, changed, className }: RegisterTab
           <span>{selected === null ? 'Bin' : `${REGISTER_NAMES[selected]} · bin`}</span>
           <span className="normal-case tracking-normal text-ink-3/60">
             {selectedValue === null
-              ? '选中一行查看位模式'
+              ? t('选中一行查看位模式', 'select a row to see its bit pattern')
               : `${toDec(selectedValue)} · ${toHex(selectedValue)}`}
           </span>
         </div>
-        <div className="mt-1 truncate font-mono text-[10px] text-ink-3/80" aria-label="位模式">
+        <div className="mt-1 truncate font-mono text-[10px] text-ink-3/80" aria-label={t('位模式', 'Bit pattern')}>
           {selectedValue === null ? EMPTY : toBin(selectedValue)}
         </div>
       </div>
@@ -89,9 +91,9 @@ export function RegisterTable({ values = null, changed, className }: RegisterTab
 }
 
 const FLAGS = [
-  { id: 'ZF' as const, hint: '结果为零' },
-  { id: 'SF' as const, hint: '结果为负' },
-  { id: 'OF' as const, hint: '有符号溢出' },
+  { id: 'ZF' as const, hint: '结果为零', hintEn: 'result is zero' },
+  { id: 'SF' as const, hint: '结果为负', hintEn: 'result is negative' },
+  { id: 'OF' as const, hint: '有符号溢出', hintEn: 'signed overflow' },
 ]
 
 const STAT_TONE: Record<Stat, string> = {
@@ -111,6 +113,7 @@ export function FlagPanel({
   stat?: Stat | null
   className?: string
 }) {
+  const { t } = useI18n()
   return (
     <div className={cn('space-y-1.5 p-2', className)}>
       <div className="grid grid-cols-3 gap-1.5">
@@ -123,7 +126,7 @@ export function FlagPanel({
                 'rounded-md border px-2 py-1.5 transition-colors',
                 on ? 'border-ok/40 bg-ok/10' : 'border-line/80 bg-panel/50',
               )}
-              title={flag.hint}
+              title={t(flag.hint, flag.hintEn)}
             >
               <div className="font-mono text-[9px] tracking-[0.16em] text-ctrl">{flag.id}</div>
               <div
@@ -152,7 +155,10 @@ export function FlagPanel({
           </span>
         </div>
         <p className="mt-1 text-[9.5px] leading-relaxed text-ink-3/70">
-          AOK 正常 · HLT 停机 · ADR 地址异常 · INS 非法指令
+          <T
+            zh="AOK 正常 · HLT 停机 · ADR 地址异常 · INS 非法指令"
+            en="AOK ok · HLT halted · ADR bad address · INS illegal instruction"
+          />
         </p>
       </div>
     </div>

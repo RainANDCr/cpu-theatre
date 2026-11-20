@@ -46,7 +46,7 @@ export function Segmented<T extends string | number>({
               size === 'sm' ? 'px-2 py-0.5 font-mono text-[10px]' : 'px-2.5 py-1 font-mono text-[11px]',
               active
                 ? 'bg-accent font-medium text-void'
-                : 'text-ink-3 hover:text-ink-2 hover:bg-white/[0.04]',
+                : 'text-ink-3 hover:text-ink-2 hover:bg-ink/[0.05]',
             )}
           >
             {option.label}

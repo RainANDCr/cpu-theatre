@@ -1,4 +1,5 @@
 import { cn } from '../../lib/cn'
+import { useI18n } from '../../i18n'
 import type { StageName } from '../../core/execution/types'
 import { useSettingsStore } from '../../store/settingsStore'
 import {
@@ -28,11 +29,11 @@ const FILL: Record<StageTone, string> = {
   slate: 'fill-line-2',
 }
 
-const LEGEND: { tone: StageTone; label: string }[] = [
-  { tone: 'bus', label: '数据 / 地址' },
-  { tone: 'ctrl', label: '控制信号' },
-  { tone: 'reg', label: '寄存器读写' },
-  { tone: 'alu', label: 'ALU 结果' },
+const LEGEND: { tone: StageTone; label: string; labelEn: string }[] = [
+  { tone: 'bus', label: '数据 / 地址', labelEn: 'data / address' },
+  { tone: 'ctrl', label: '控制信号', labelEn: 'control' },
+  { tone: 'reg', label: '寄存器读写', labelEn: 'register r/w' },
+  { tone: 'alu', label: 'ALU 结果', labelEn: 'ALU result' },
 ]
 
 export interface CPUStageProps {
@@ -51,6 +52,8 @@ export interface CPUStageProps {
  * 没参与这一拍的线保持静止。这样看到的东西和真实执行永远一致。
  */
 export function CPUStage({ selected, onSelect, stage = null, className }: CPUStageProps) {
+  // SVG 的 <text> 里塞不下双语两行，图例只显示当前语言
+  const { t } = useI18n()
   const highlight = stage ? STAGE_HIGHLIGHTS[stage] : null
   const activeModules = new Set<StageModuleId>(highlight?.modules ?? [])
   const activeWires = new Set<string>(highlight?.wires ?? [])
@@ -62,7 +65,7 @@ export function CPUStage({ selected, onSelect, stage = null, className }: CPUSta
       viewBox={`0 0 ${STAGE_VIEWBOX.width} ${STAGE_VIEWBOX.height}`}
       className={cn('mx-auto block h-full w-full max-w-[780px]', className)}
       role="group"
-      aria-label="Y86-64 顺序执行数据通路"
+      aria-label={t('Y86-64 顺序执行数据通路', 'Y86-64 sequential datapath')}
     >
       <defs>
         {(Object.keys(STROKE) as StageTone[]).map((tone) => (
@@ -222,7 +225,7 @@ export function CPUStage({ selected, onSelect, stage = null, className }: CPUSta
           <g key={item.tone} transform={`translate(${index * 132}, 0)`}>
             <circle cx={0} cy={-2.5} r={2.6} className={FILL[item.tone]} />
             <text x={9} y={0} fontSize={8.2} className="fill-ink-3 font-mono">
-              {item.label}
+              {t(item.label, item.labelEn)}
             </text>
           </g>
         ))}

@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { T } from '../../i18n'
 import { buttonClass } from '../ui/buttonStyles'
 
 interface ErrorBoundaryProps {
@@ -33,10 +34,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-err">
           view crashed
         </div>
-        <h1 className="mt-3 text-[24px] font-semibold text-ink">界面出错了</h1>
+        <h1 className="mt-3 text-[24px] font-semibold text-ink">
+          <T zh="界面出错了" en="The interface crashed" />
+        </h1>
         <p className="mt-2 max-w-[520px] text-[12.5px] leading-relaxed text-ink-2">
-          这不是处理器异常，而是视图渲染失败。刷新页面通常可以恢复；如果反复出现，
-          请把下面这行信息记下来。
+          <T
+            block
+            zh="这不是处理器异常，而是视图渲染失败。刷新页面通常可以恢复；如果反复出现，请把下面这行信息记下来。"
+            en="This is a view-rendering failure, not a processor fault. Reloading usually clears it; if it keeps happening, copy the line below."
+          />
         </p>
         <pre className="mt-4 max-w-[720px] overflow-x-auto rounded-lg border border-line/80 bg-panel/60 px-3 py-2 text-left font-mono text-[11px] text-err">
           {error.message}
@@ -46,7 +52,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           onClick={() => window.location.reload()}
           className={buttonClass({ className: 'mt-6' })}
         >
-          重新加载
+          <T zh="重新加载" en="Reload" />
         </button>
       </div>
     )

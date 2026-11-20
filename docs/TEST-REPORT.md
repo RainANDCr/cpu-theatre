@@ -6,7 +6,7 @@
 
 > 现状摘要（能力 / 限制 / 人工清单）见 [STATUS.md](STATUS.md)；本文只负责「怎么测、测出了什么」。
 
-**结论**：304 个单元/组件用例 + 30 个端到端用例全部通过；验收 A–E 全部有可复现断言；
+**结论**：311 个单元/组件用例 + 35 个端到端用例全部通过；验收 A–E 全部有可复现断言；
 生产产物离线运行零外部请求。
 
 ## 1. 环境
@@ -23,7 +23,7 @@
 
 ```
 Test Files  23 passed (23)
-     Tests  304 passed (304)
+     Tests  311 passed (311)
   Duration  23.7s
 ```
 
@@ -48,7 +48,8 @@ Test Files  23 passed (23)
 | `store/settings-store.test.ts` | 6 | 持久化、复位、面板尺寸 |
 | `ui/*.test.tsx`（5 个） | 32 | 路由、模拟器空态与执行、编辑器汇编、学习中心、设置 |
 | `core/registers.test.ts` | 5 | 寄存器编号与名称映射 |
-| **合计** | **304** | |
+| `ui/i18n-theme.test.tsx` | 7 | 三档语言结构一致、`html[lang]`、双语片段 `lang="en"`、主题开关与持久化 |
+| **合计** | **311** | |
 
 ## 3. 验收用例
 
@@ -153,6 +154,7 @@ npm run test:e2e:update   # 重建视觉基线
 | `e2e/simulator.spec.ts` | 5 | 空态不编数据；单步只走一条；**回退真的恢复状态**；跑完 = 验收 A；断点在目标指令前停住 |
 | `e2e/offline.spec.ts` | 1 | 九个模块逐个访问：非 localhost 请求一律 abort 并断言为空；console error 与页面异常为空 |
 | `e2e/hidpi.spec.ts` | 4 | 125%（1536×864）/150%（1280×720）下，DPR 生效、无横向溢出、单步与汇编仍正确 |
+| `e2e/i18n-theme.spec.ts` | 5 | 三档语言切换（结构不变）、双语对照块、浅色主题对比度 ≥ 4.5、次级行对比度、偏好持久化 |
 | `e2e/mobile.spec.ts` | 2 | 390px 下汉堡开抽屉、ESC 关闭并归还焦点；选模块后自动收起；无横向溢出 |
 | `e2e/editor.spec.ts` | 6 | 默认示例出 `30 F0 0A` / 23 B；输错代码给出诊断**与建议**；Ctrl+Enter 等价于点按钮；数据段示例的 `.quad` 进 Listing；字符串示例落盘为 UTF-8；精简 bundle 后撤销与查找仍可用 |
 | `e2e/pipeline.spec.ts` | 3 | 空态五列各有职责说明；推进五拍后五列装着**不同**指令，顶栏显示 `PIPE / CYCLE 5` 而不是 `SEQ / OFFLINE`；无横向溢出 |

@@ -87,7 +87,7 @@ export function ModulePlaceholder({
                   <li key={item.path}>
                     <Link
                       to={item.path}
-                      className="group flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12px] text-ink-2 transition-colors hover:bg-white/[0.04] hover:text-accent"
+                      className="group flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12px] text-ink-2 transition-colors hover:bg-ink/[0.05] hover:text-accent"
                     >
                       <ArrowUpRight size={13} className="text-ink-3 group-hover:text-accent" />
                       {item.label}

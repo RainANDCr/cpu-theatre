@@ -8,6 +8,8 @@ import { usePipeStore } from '../../store/pipeStore'
 import { Readout } from '../ui/Readout'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useUiStore } from '../../store/uiStore'
+import { T, useI18n } from '../../i18n'
+import { AppearanceControls } from './AppearanceControls'
 
 const ENGINE_LABEL: Record<string, string> = {
   offline: 'OFFLINE',
@@ -44,6 +46,7 @@ export function TopBar() {
   const isWide = useMediaQuery('(min-width: 1024px)')
   const navOpen = useUiStore((state) => state.mobileNavOpen)
   const toggleNav = useUiStore((state) => state.toggleMobileNav)
+  const { t } = useI18n()
 
   const statusLabel = isPipeline
     ? !pipeReady
@@ -77,7 +80,7 @@ export function TopBar() {
         <button
           type="button"
           onClick={toggleNav}
-          aria-label={navOpen ? '关闭模块导航' : '打开模块导航'}
+          aria-label={navOpen ? t('关闭模块导航', 'Close navigation') : t('打开模块导航', 'Open navigation')}
           aria-expanded={navOpen}
           aria-controls="mobile-nav"
           className="-ml-1 flex size-9 shrink-0 items-center justify-center rounded-lg border border-line/80 text-ink-2 transition-colors hover:border-accent/40 hover:text-accent"
@@ -91,14 +94,17 @@ export function TopBar() {
             Module {String(moduleIndex).padStart(2, '0')}
           </span>
           <span className="hidden text-line-2 sm:inline">/</span>
-          <span className="whitespace-nowrap text-ink-2">{module.label}</span>
-          <span className="hidden text-line-2 md:inline">/</span>
-          <span className="hidden whitespace-nowrap text-ink-3 md:inline">{module.labelZh}</span>
+          <span className="whitespace-nowrap text-ink-2">
+            <T zh={module.labelZh} en={module.label} />
+          </span>
         </div>
-        <div className="mt-0.5 truncate text-[11px] text-ink-3">{module.blurb}</div>
+        <div className="mt-0.5 truncate text-[11px] text-ink-3">
+          <T zh={module.blurb} en={module.blurbEn} />
+        </div>
       </div>
 
       <div className="ml-auto flex items-center gap-1.5">
+        <AppearanceControls className="mr-0.5" />
         <Readout label="Mode" value={mode} tone="purple" className="hidden md:flex" />
         <Readout
           label="Status"
@@ -112,8 +118,8 @@ export function TopBar() {
 
         <Link
           to="/settings"
-          aria-label="打开设置"
-          title="设置"
+          aria-label={t('打开设置', 'Open settings')}
+          title={t('设置', 'Settings')}
           className={cn(
             'ml-1 flex size-8 items-center justify-center rounded-lg border border-line/80 text-ink-3 transition-colors hover:border-accent/40 hover:text-accent',
             pathname.startsWith('/settings') && 'border-accent/40 text-accent',

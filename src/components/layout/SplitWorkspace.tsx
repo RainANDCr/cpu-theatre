@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { cn } from '../../lib/cn'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { useI18n } from '../../i18n'
 import {
   DEFAULT_SETTINGS,
   PANE_LIMITS,
@@ -57,10 +58,11 @@ export function SplitWorkspace({
   center,
   right,
   bottom,
-  leftLabel = '源码面板',
-  rightLabel = '观察器面板',
-  bottomLabel = '时间轴与日志面板',
+  leftLabel,
+  rightLabel,
+  bottomLabel,
 }: SplitWorkspaceProps) {
+  const { t } = useI18n()
   const isWide = useMediaQuery('(min-width: 1440px)')
   const storedLeft = useSettingsStore((s) => s.left)
   const storedRight = useSettingsStore((s) => s.right)
@@ -164,11 +166,11 @@ export function SplitWorkspace({
     setPaneSize(key, DEFAULT_SETTINGS[key])
   }
 
-  const handle = (key: PaneKey, label: string) => (
+  const handle = (key: PaneKey, label: string, labelEn: string) => (
     <div
       role="separator"
       aria-orientation={AXIS[key] === 'x' ? 'vertical' : 'horizontal'}
-      aria-label={label}
+      aria-label={t(label, labelEn)}
       aria-valuenow={live[key]}
       aria-valuemin={PANE_LIMITS[key].min}
       aria-valuemax={PANE_LIMITS[key].max}
@@ -176,7 +178,7 @@ export function SplitWorkspace({
       onPointerDown={startDrag(key)}
       onKeyDown={nudge(key)}
       onDoubleClick={resetPane(key)}
-      title={`${label}（拖动调整，双击复位）`}
+      title={t(`${label}（拖动调整，双击复位）`, `${labelEn}: drag to resize, double-click to reset`)}
       className={cn(
         'group relative z-20 flex shrink-0 items-center justify-center outline-none',
         AXIS[key] === 'x' ? 'w-1.5 cursor-col-resize' : 'h-1.5 w-full cursor-row-resize',
@@ -219,14 +221,14 @@ export function SplitWorkspace({
         <div style={{ width: leftWidth }} className="flex min-h-0 shrink-0 flex-col overflow-hidden">
           {left}
         </div>
-        {handle('left', leftLabel)}
+        {leftLabel ? handle('left', leftLabel, leftLabel) : handle('left', '源码面板', 'Source pane')}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">{center}</div>
-        {handle('right', rightLabel)}
+        {rightLabel ? handle('right', rightLabel, rightLabel) : handle('right', '观察器面板', 'Observer pane')}
         <div style={{ width: rightWidth }} className="flex min-h-0 shrink-0 flex-col overflow-hidden">
           {right}
         </div>
       </div>
-      {handle('bottom', bottomLabel)}
+      {bottomLabel ? handle('bottom', bottomLabel, bottomLabel) : handle('bottom', '时间轴与日志面板', 'Timeline and log pane')}
       <div style={{ height: live.bottom }} className="flex min-h-0 shrink-0 flex-col overflow-hidden">
         {bottom}
       </div>

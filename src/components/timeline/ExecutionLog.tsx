@@ -1,4 +1,5 @@
 import { formatConditionCodes } from '../../core/cpu/ConditionCodes'
+import { T, useI18n } from '../../i18n'
 import { formatAddress, formatValue } from '../../core/isa/format'
 import { registerName } from '../../core/isa/registers'
 import type { InstructionTrace } from '../../core/seq/SEQProcessor'
@@ -50,10 +51,11 @@ export interface ExecutionLogProps {
  * 空态时连示例行都不放：日志的价值就在于它只写真实发生过的事。
  */
 export function ExecutionLog({ history, onSelect, position, className }: ExecutionLogProps) {
+  const { t } = useI18n()
   return (
     <div
       role="region"
-      aria-label="执行日志"
+      aria-label={t('执行日志', 'Execution log')}
       className={cn('flex min-h-0 flex-1 flex-col overflow-hidden', className)}
     >
       <div className="flex shrink-0 items-center gap-2 border-b border-line/70 bg-shell/40 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
@@ -67,10 +69,13 @@ export function ExecutionLog({ history, onSelect, position, className }: Executi
       {history.length === 0 ? (
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 px-4 text-center">
           <div className="h-px w-10 bg-line-2" aria-hidden="true" />
-          <p className="text-[11.5px] text-ink-2">尚无执行记录</p>
+          <p className="text-[11.5px] text-ink-2">{t('尚无执行记录', 'No records yet')}</p>
           <p className="max-w-[420px] text-[10.5px] leading-relaxed text-ink-3">
-            点「单步」或「运行」后，每执行一条指令就追加一行：周期、PC、指令、寄存器与内存的变化、
-            条件码、状态码。点任意一行可回看到那一拍。
+            <T
+              block
+              zh="点「单步」或「运行」后，每执行一条指令就追加一行：周期、PC、指令、寄存器与内存的变化、条件码、状态码。点任意一行可回看到那一拍。"
+              en="Press Step or Run and each instruction appends a row: cycle, PC, instruction, register and memory deltas, flags and status. Click a row to rewind to that cycle."
+            />
           </p>
         </div>
       ) : (
@@ -81,7 +86,7 @@ export function ExecutionLog({ history, onSelect, position, className }: Executi
               type="button"
               onClick={() => onSelect?.(index + 1)}
               className={cn(
-                'flex w-full items-center gap-2 border-b border-line/25 px-3 py-[3px] text-left font-mono text-[10.5px] transition-colors hover:bg-white/[0.03]',
+                'flex w-full items-center gap-2 border-b border-line/25 px-3 py-[3px] text-left font-mono text-[10.5px] transition-colors hover:bg-ink/[0.04]',
                 position === index + 1 && 'bg-accent/[0.08]',
               )}
             >

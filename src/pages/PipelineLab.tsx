@@ -9,6 +9,7 @@ import { usePipeStore } from '../store/pipeStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { Badge } from '../components/ui/Badge'
 import { Readout } from '../components/ui/Readout'
+import { T, useI18n } from '../i18n'
 import { buttonClass } from '../components/ui/buttonStyles'
 
 const STAGES = [
@@ -20,12 +21,27 @@ const STAGES = [
 ] as const
 
 /** 空态里代替假数据的说明：告诉用户这一段将来会显示什么 */
-const STAGE_HINT: Record<string, string> = {
-  F: '按预测 PC 取 10 字节指令，产出 icode / ifun / valC / valP。',
-  D: '读寄存器文件，把操作数随指令一起锁进 D 寄存器。',
-  E: 'ALU 算结果与条件码；同时判断跳转是否真的发生。',
-  M: '读或写数据内存；这里也是加载互锁被判定出来的地方。',
-  W: '把结果写回寄存器文件，指令在此退休。',
+const STAGE_HINT: Record<string, { zh: string; en: string }> = {
+  F: {
+    zh: '按预测 PC 取 10 字节指令，产出 icode / ifun / valC / valP。',
+    en: 'Fetch 10 bytes at the predicted PC; produce icode / ifun / valC / valP.',
+  },
+  D: {
+    zh: '读寄存器文件，把操作数随指令一起锁进 D 寄存器。',
+    en: 'Read the register file and latch operands into the D register.',
+  },
+  E: {
+    zh: 'ALU 算结果与条件码；同时判断跳转是否真的发生。',
+    en: 'The ALU computes value and flags, and decides whether the branch is really taken.',
+  },
+  M: {
+    zh: '读或写数据内存；这里也是加载互锁被判定出来的地方。',
+    en: 'Read or write data memory — and where the load-use interlock is detected.',
+  },
+  W: {
+    zh: '把结果写回寄存器文件，指令在此退休。',
+    en: 'Write the result back to the register file; the instruction retires here.',
+  },
 }
 
 const TONE_RING: Record<string, string> = {
@@ -82,6 +98,7 @@ function details(stage: string, slot: PipeSlot): Array<[string, string]> {
 }
 
 export default function PipelineLab() {
+  const { t } = useI18n()
   const ready = usePipeStore((s) => s.ready)
   const cycle = usePipeStore((s) => s.cycle)
   const stat = usePipeStore((s) => s.stat)
@@ -111,30 +128,42 @@ export default function PipelineLab() {
 
   const hazard = useMemo(() => {
     if (!trace) return null
-    if (trace.stall) return { tone: 'text-alu', label: 'STALL', detail: '加载/使用冒险：暂停取指与译码' }
-    if (trace.bubble) return { tone: 'text-ctrl', label: 'BUBBLE', detail: '分支预测失败：丢弃已取指令' }
+    if (trace.stall)
+      return {
+        tone: 'text-alu',
+        label: 'STALL',
+        detail: t('加载/使用冒险：暂停取指与译码', 'load/use hazard: fetch and decode hold'),
+      }
+    if (trace.bubble)
+      return {
+        tone: 'text-ctrl',
+        label: 'BUBBLE',
+        detail: t('分支预测失败：丢弃已取指令', 'mispredicted branch: fetched work is discarded'),
+      }
     if (trace.forwarding.a || trace.forwarding.b)
       return {
         tone: 'text-ok',
         label: 'FORWARD',
-        detail: `转发 ${[trace.forwarding.a ? 'A' : '', trace.forwarding.b ? 'B' : ''].filter(Boolean).join('+')}`,
+        detail: `${t('转发', 'forward')} ${[trace.forwarding.a ? 'A' : '', trace.forwarding.b ? 'B' : ''].filter(Boolean).join('+')}`,
       }
     return null
-  }, [trace])
+  }, [trace, t])
 
   return (
     <div className="flex h-[calc(100dvh-84px)] min-h-[540px] flex-col overflow-hidden">
-      <h1 className="sr-only">Pipeline Lab · 五级流水线</h1>
+      <h1 className="sr-only">
+        {t('Pipeline Lab · 五级流水线', 'Pipeline Lab · five-stage pipeline')}
+      </h1>
 
       <div className="flex min-h-12 shrink-0 flex-wrap items-center gap-2 border-b border-line/80 bg-shell/40 px-3 py-1.5">
         <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink-3">PIPE</span>
         <Badge tone="purple">5-stage</Badge>
         <span className="h-5 w-px bg-line/80" aria-hidden="true" />
 
-        <div className="flex items-center gap-1" role="group" aria-label="流水线控制">
+        <div className="flex items-center gap-1" role="group" aria-label={t('流水线控制', 'Pipeline controls')}>
           <button type="button" onClick={() => load()} className={buttonClass({ variant: 'subtle', size: 'sm' })}>
             <PackageCheck size={12} />
-            装载
+            <T zh="装载" en="Load" />
           </button>
           <button
             type="button"
@@ -143,7 +172,7 @@ export default function PipelineLab() {
             className={buttonClass({ variant: 'subtle', size: 'sm' })}
           >
             <StepForward size={12} />
-            下一拍
+            <T zh="下一拍" en="Next cycle" />
           </button>
           <button
             type="button"
@@ -152,7 +181,7 @@ export default function PipelineLab() {
             className={buttonClass({ variant: 'primary', size: 'sm' })}
           >
             <Play size={12} />
-            运行
+            <T zh="运行" en="Run" />
           </button>
           <button
             type="button"
@@ -161,7 +190,7 @@ export default function PipelineLab() {
             className={buttonClass({ variant: 'subtle', size: 'sm' })}
           >
             <Pause size={12} />
-            暂停
+            <T zh="暂停" en="Pause" />
           </button>
           <button
             type="button"
@@ -170,7 +199,7 @@ export default function PipelineLab() {
             className={buttonClass({ variant: 'subtle', size: 'sm' })}
           >
             <SkipForward size={12} />
-            跑完
+            <T zh="跑完" en="Run to end" />
           </button>
           <button
             type="button"
@@ -179,7 +208,7 @@ export default function PipelineLab() {
             className={buttonClass({ variant: 'ghost', size: 'sm' })}
           >
             <RotateCcw size={12} />
-            复位
+            <T zh="复位" en="Reset" />
           </button>
         </div>
 
@@ -228,7 +257,7 @@ export default function PipelineLab() {
 
                 <div className="flex min-h-0 flex-1 flex-col items-start gap-1 px-2.5 py-3">
                   {!ready ? (
-                    <p className="text-[11px] leading-relaxed text-ink-3/70">{STAGE_HINT[stage.id]}</p>
+                    <p className="text-[11px] leading-relaxed text-ink-3/70"><T zh={STAGE_HINT[stage.id]?.zh ?? ''} en={STAGE_HINT[stage.id]?.en ?? ''} /></p>
                   ) : empty ? (
                     <span className="font-mono text-[11px] italic text-ink-3/50">bubble</span>
                   ) : (
@@ -261,7 +290,7 @@ export default function PipelineLab() {
               Cycle log
             </span>
             <span className="font-mono text-[9px] text-ink-3/60">
-              {traces.length === 0 ? '尚未开始' : `${traces.length} 拍`}
+              {traces.length === 0 ? t('尚未开始', 'not started') : `${traces.length} ${t('拍', 'cycles')}`}
             </span>
             <div className="ml-auto flex items-center gap-1 overflow-x-auto no-scrollbar">
               {traces.slice(-24).map((item) => (
@@ -285,15 +314,18 @@ export default function PipelineLab() {
 
           {trace ? (
             <p className="mt-1.5 truncate font-mono text-[9.5px] text-ink-3">
-              本拍：新 PC {toHex(trace.newPc, 4)}
+              {t('本拍', 'this cycle')}: new PC {toHex(trace.newPc, 4)}
               {trace.written.length > 0 &&
-                ` · 写回 ${trace.written.map((w) => `${reg(w.register)}=${formatValue(w.value)}`).join(' ')}`}
+                ` · ${t('写回', 'write-back')} ${trace.written.map((w) => `${reg(w.register)}=${formatValue(w.value)}`).join(' ')}`}
               {trace.memory &&
                 ` · ${trace.memory.kind === 'write' ? 'W' : 'R'} ${toHex(trace.memory.address, 4)}=${formatValue(trace.memory.value)}`}
             </p>
           ) : (
             <p className="mt-1.5 font-mono text-[9.5px] text-ink-3/60">
-              程序取自 Instruction Editor。点「装载」把当前源码装进流水线。
+              {t(
+                '程序取自 Instruction Editor。点「装载」把当前源码装进流水线。',
+                'Source comes from Instruction Editor. Press Load to push it into the pipeline.',
+              )}
             </p>
           )}
         </div>

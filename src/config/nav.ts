@@ -32,8 +32,10 @@ export interface NavModule {
   icon: LucideIcon
   /** 该模块所属开发阶段，便于界面如实标注「尚未构建」 */
   phase: number
-  /** 一句话说明这个模块解决什么问题 */
+  /** 一句话说明这个模块解决什么问题（中文） */
   blurb: string
+  /** 同上，英文；两种语言都写在配置里，避免只有一边有文案 */
+  blurbEn: string
 }
 
 export const NAV_MODULES: NavModule[] = [
@@ -45,6 +47,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: LayoutDashboard,
     phase: 0,
     blurb: '项目地图、引擎状态与阶段进度',
+    blurbEn: 'Project map, engine state and phase progress',
   },
   {
     id: 'simulator',
@@ -54,6 +57,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: Cpu,
     phase: 3,
     blurb: '六阶段数据通路与真实执行',
+    blurbEn: 'Six-stage datapath with real execution',
   },
   {
     id: 'editor',
@@ -63,6 +67,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: Code2,
     phase: 2,
     blurb: 'Y86-64 汇编、汇编结果与断点',
+    blurbEn: 'Y86-64 assembly, listing and breakpoints',
   },
   {
     id: 'registers',
@@ -72,6 +77,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: LayoutGrid,
     phase: 3,
     blurb: '15 个通用寄存器与条件码',
+    blurbEn: '15 general registers and condition codes',
   },
   {
     id: 'memory',
@@ -81,6 +87,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: MemoryStick,
     phase: 3,
     blurb: '字节寻址、小端视角与读写痕迹',
+    blurbEn: 'Byte addressing, little-endian view and access traces',
   },
   {
     id: 'pipeline',
@@ -90,6 +97,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: GitBranch,
     phase: 6,
     blurb: '五阶段流水、冒险与转发',
+    blurbEn: 'Five-stage pipeline, hazards and forwarding',
   },
   {
     id: 'logic',
@@ -99,6 +107,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: CircuitBoard,
     phase: 8,
     blurb: '门电路、组合逻辑与 HCL',
+    blurbEn: 'Gates, combinational logic and HCL',
   },
   {
     id: 'learning',
@@ -108,6 +117,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: GraduationCap,
     phase: 9,
     blurb: '概念、演示、自测三件套',
+    blurbEn: 'Concepts, demos and self-checks',
   },
   {
     id: 'settings',
@@ -117,6 +127,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: Settings,
     phase: 0,
     blurb: '外观、动效与本地偏好',
+    blurbEn: 'Appearance, motion and local preferences',
   },
 ]
 

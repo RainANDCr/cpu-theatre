@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { T, useI18n } from '../i18n'
 import { Badge } from '../components/ui/Badge'
 import { Panel } from '../components/ui/Panel'
 import { Segmented } from '../components/ui/Segmented'
@@ -11,13 +12,37 @@ type GateKind = 'AND' | 'OR' | 'XOR' | 'NOT' | 'MUX'
 
 const GATES: Record<
   GateKind,
-  { inputs: 1 | 2 | 3; hint: string; evaluate: (a: boolean, b: boolean, s: boolean) => boolean }
+  {
+    inputs: 1 | 2 | 3
+    hint: { zh: string; en: string }
+    evaluate: (a: boolean, b: boolean, s: boolean) => boolean
+  }
 > = {
-  AND: { inputs: 2, hint: '两个都为 1 才输出 1', evaluate: (a, b) => a && b },
-  OR: { inputs: 2, hint: '有一个为 1 就输出 1', evaluate: (a, b) => a || b },
-  XOR: { inputs: 2, hint: '两个不同才输出 1', evaluate: (a, b) => a !== b },
-  NOT: { inputs: 1, hint: '取反', evaluate: (a) => !a },
-  MUX: { inputs: 3, hint: 's=0 选 A，s=1 选 B', evaluate: (a, b, s) => (s ? b : a) },
+  AND: {
+    inputs: 2,
+    hint: { zh: '两个都为 1 才输出 1', en: 'outputs 1 only when both inputs are 1' },
+    evaluate: (a, b) => a && b,
+  },
+  OR: {
+    inputs: 2,
+    hint: { zh: '有一个为 1 就输出 1', en: 'outputs 1 when either input is 1' },
+    evaluate: (a, b) => a || b,
+  },
+  XOR: {
+    inputs: 2,
+    hint: { zh: '两个不同才输出 1', en: 'outputs 1 when the inputs differ' },
+    evaluate: (a, b) => a !== b,
+  },
+  NOT: {
+    inputs: 1,
+    hint: { zh: '取反', en: 'inverts the input' },
+    evaluate: (a) => !a,
+  },
+  MUX: {
+    inputs: 3,
+    hint: { zh: 's=0 选 A，s=1 选 B', en: 's=0 selects A, s=1 selects B' },
+    evaluate: (a, b, s) => (s ? b : a),
+  },
 }
 
 function Bit({ value, onClick, label }: { value: boolean; onClick?: () => void; label: string }) {
@@ -62,6 +87,7 @@ function TruthRow({ cells, highlight }: { cells: string[]; highlight?: boolean }
 }
 
 function GateLab() {
+  const { t } = useI18n()
   const [kind, setKind] = useState<GateKind>('AND')
   const [a, setA] = useState(true)
   const [b, setB] = useState(false)
@@ -85,7 +111,7 @@ function GateLab() {
     kind === 'NOT' ? ['A', 'Y'] : kind === 'MUX' ? ['S', 'A', 'B', 'Y'] : ['A', 'B', 'Y']
 
   return (
-    <Panel title="Gate bench" subtitle={gate.hint} actions={<Badge tone="purple">combinational</Badge>}>
+    <Panel title="Gate bench" subtitle={<T zh={gate.hint.zh} en={gate.hint.en} />} actions={<Badge tone="purple">combinational</Badge>}>
       <div className="flex flex-wrap items-center gap-1.5">
         {(Object.keys(GATES) as GateKind[]).map((item) => (
           <button
@@ -108,20 +134,20 @@ function GateLab() {
       <div className="mt-4 flex flex-wrap items-center justify-center gap-6 rounded-xl border border-line/70 bg-void/40 px-4 py-5">
         <div className="flex flex-col items-center gap-1">
           <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">A</span>
-          <Bit value={a} onClick={() => setA((v) => !v)} label="输入 A" />
+          <Bit value={a} onClick={() => setA((v) => !v)} label={t('输入 A', 'Input A')} />
         </div>
 
         {gate.inputs >= 2 && (
           <div className="flex flex-col items-center gap-1">
             <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">B</span>
-            <Bit value={b} onClick={() => setB((v) => !v)} label="输入 B" />
+            <Bit value={b} onClick={() => setB((v) => !v)} label={t('输入 B', 'Input B')} />
           </div>
         )}
 
         {gate.inputs === 3 && (
           <div className="flex flex-col items-center gap-1">
             <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">S</span>
-            <Bit value={sel} onClick={() => setSel((v) => !v)} label="选择端 S" />
+            <Bit value={sel} onClick={() => setSel((v) => !v)} label={t('选择端 S', 'Select S')} />
           </div>
         )}
 
@@ -140,7 +166,7 @@ function GateLab() {
 
         <div className="flex flex-col items-center gap-1">
           <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">Y</span>
-          <Bit value={output} label="输出 Y" />
+          <Bit value={output} label={t('输出 Y', 'Output Y')} />
         </div>
       </div>
 
@@ -188,6 +214,7 @@ function parseHex(text: string): bigint | null {
 }
 
 function AluLab() {
+  const { t } = useI18n()
   const [op, setOp] = useState<AluOp>('add')
   const [aText, setAText] = useState('0x0A')
   const [bText, setBText] = useState('0x14')
@@ -200,7 +227,12 @@ function AluLab() {
   return (
     <Panel
       title="ALU bench"
-      subtitle="和引擎里执行 addq/subq/andq/xorq 的是同一个函数"
+      subtitle={
+        <T
+          zh="和引擎里执行 addq/subq/andq/xorq 的是同一个函数"
+          en="The very same function the engine uses for addq/subq/andq/xorq"
+        />
+      }
       actions={<Badge tone="amber">{mnemonic}</Badge>}
     >
       <div className="flex flex-wrap items-end gap-3">
@@ -213,7 +245,7 @@ function AluLab() {
 
         <label className="flex flex-col gap-1">
           <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
-            valA（源）
+            {t('valA（源）', 'valA (source)')}
           </span>
           <input
             value={aText}
@@ -225,7 +257,7 @@ function AluLab() {
 
         <label className="flex flex-col gap-1">
           <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
-            valB（目的）
+            {t('valB（目的）', 'valB (destination)')}
           </span>
           <input
             value={bText}
@@ -236,7 +268,7 @@ function AluLab() {
         </label>
 
         <div className="flex items-center gap-2 font-mono text-[11px] text-ink-3">
-          <span>结果</span>
+          <span>{t('结果', 'result')}</span>
           <span className="rounded-lg border border-alu/40 bg-alu/10 px-2.5 py-1.5 font-mono text-[12px] text-alu">
             {result ? toHex(result.value) : '—'}
           </span>
@@ -245,7 +277,9 @@ function AluLab() {
 
       <div className="mt-3 grid gap-2 sm:grid-cols-4">
         <div className="rounded-lg border border-line/80 bg-panel/50 px-3 py-2">
-          <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">十进制</div>
+          <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
+            {t('十进制', 'decimal')}
+          </div>
           <div className="mt-0.5 truncate font-mono text-[12px] text-ink">
             {result ? toDec(result.value) : '—'}
           </div>
@@ -311,6 +345,7 @@ const HCL_SNIPPETS = [
 ]
 
 export default function LogicLab() {
+  const { t } = useI18n()
   return (
     <div className="mx-auto w-full max-w-[1180px] px-5 pb-14 pt-7 lg:px-9">
       <div className="flex flex-wrap items-center gap-2.5">
@@ -333,7 +368,12 @@ export default function LogicLab() {
       <div className="mt-6 grid items-start gap-4 lg:grid-cols-[1.25fr_0.75fr]">
         <GateLab />
 
-        <Panel title="HCL：硬件的「如果」" subtitle="三条真实控制逻辑，摘自本项目的译码器">
+        <Panel
+          title={t('HCL：硬件的「如果」', 'HCL: the hardware “if”')}
+          subtitle={
+            <T zh="三条真实控制逻辑，摘自本项目的译码器" en="Three real control rules, taken from this project's decoder" />
+          }
+        >
           <div className="space-y-3">
             {HCL_SNIPPETS.map((snippet) => (
               <div key={snippet.title}>

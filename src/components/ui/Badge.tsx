@@ -4,7 +4,7 @@ import { cn } from '../../lib/cn'
 export type BadgeTone = 'slate' | 'blue' | 'purple' | 'cyan' | 'amber' | 'green' | 'red'
 
 const BADGE_TONES: Record<BadgeTone, { chip: string; dot: string }> = {
-  slate: { chip: 'border-line-2/70 bg-white/[0.03] text-ink-3', dot: 'bg-ink-3' },
+  slate: { chip: 'border-line-2/70 bg-ink/[0.04] text-ink-3', dot: 'bg-ink-3' },
   blue: { chip: 'border-bus/30 bg-bus/10 text-bus', dot: 'bg-bus' },
   purple: { chip: 'border-ctrl/30 bg-ctrl/10 text-ctrl', dot: 'bg-ctrl' },
   cyan: { chip: 'border-reg/30 bg-reg/10 text-reg', dot: 'bg-reg' },

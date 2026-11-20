@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type * as MonacoApi from 'monaco-editor'
 import { cn } from '../../lib/cn'
+import { useSettingsStore } from '../../store/settingsStore'
 import { CodeSurface } from './CodeSurface'
 
 type Status = 'loading' | 'ready' | 'fallback'
@@ -36,7 +37,7 @@ export function AssemblyEditor({
   onToggleBreakpointLine,
   readOnly = false,
   className,
-  ariaLabel = 'Y86-64 汇编编辑器',
+  ariaLabel,
 }: AssemblyEditorProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const editorRef = useRef<MonacoApi.editor.IStandaloneCodeEditor | null>(null)
@@ -47,6 +48,21 @@ export function AssemblyEditor({
   const toggleBreakpointRef = useRef(onToggleBreakpointLine)
   toggleBreakpointRef.current = onToggleBreakpointLine
   const [status, setStatus] = useState<Status>('loading')
+  const theme = useSettingsStore((state) => state.theme)
+
+  // 主题切换要即时反映到编辑器，不能等重新挂载
+  useEffect(() => {
+    let disposed = false
+    void import('./monacoRuntime').then(({ loadMonaco, THEME_ID, THEME_LIGHT_ID }) => {
+      if (disposed) return
+      void loadMonaco().then((api) => {
+        api.editor.setTheme(theme === 'light' ? THEME_LIGHT_ID : THEME_ID)
+      })
+    })
+    return () => {
+      disposed = true
+    }
+  }, [theme])
 
   useEffect(() => {
     if (typeof Worker === 'undefined') {
@@ -59,14 +75,14 @@ export function AssemblyEditor({
     let instance: MonacoApi.editor.IStandaloneCodeEditor | null = null
 
     void import('./monacoRuntime')
-      .then(async ({ loadMonaco, Y86_LANGUAGE_ID, THEME_ID }) => {
+      .then(async ({ loadMonaco, Y86_LANGUAGE_ID, THEME_ID, THEME_LIGHT_ID }) => {
         const api = await loadMonaco()
         if (cancelled || !hostRef.current) return
 
         instance = api.editor.create(hostRef.current, {
           value,
           language: Y86_LANGUAGE_ID,
-          theme: THEME_ID,
+          theme: useSettingsStore.getState().theme === 'light' ? THEME_LIGHT_ID : THEME_ID,
           readOnly,
           ariaLabel,
           automaticLayout: true,
@@ -90,7 +106,7 @@ export function AssemblyEditor({
         })
         instance.addAction({
           id: 'cpu-theatre.assemble',
-          label: '汇编并查看编码',
+          label: 'Assemble · Ctrl+Enter',
           keybindings: [api.KeyMod.CtrlCmd | api.KeyCode.Enter],
           run: () => onSubmitRef.current?.(),
         })
@@ -138,7 +154,7 @@ export function AssemblyEditor({
         options: {
           isWholeLine: true,
           glyphMarginClassName: 'ct-breakpoint-glyph',
-          glyphMarginHoverMessage: { value: '断点：执行到这一行之前停下' },
+          glyphMarginHoverMessage: { value: 'Breakpoint · stop before this line' },
         },
       })
     }

@@ -1,11 +1,13 @@
 import { PaneHeader } from '../components/layout/PaneHeader'
 import { FlagPanel, RegisterTable } from '../components/registers/RegisterPanel'
+import { T, useI18n } from '../i18n'
 import { Badge } from '../components/ui/Badge'
 import { Panel } from '../components/ui/Panel'
 import { REGISTER_NAMES } from '../core/isa/registers'
 import { useCpuStore } from '../store/cpuStore'
 
 export default function RegisterLab() {
+  const { t } = useI18n()
   const registers = useCpuStore((state) => state.registers)
   const cc = useCpuStore((state) => state.cc)
   const stat = useCpuStore((state) => state.status)
@@ -20,7 +22,7 @@ export default function RegisterLab() {
         <Badge tone="cyan" dot>
           programmer-visible state
         </Badge>
-        <Badge tone={engineReady ? 'green' : 'amber'}>{engineReady ? 'live' : '未装载程序'}</Badge>
+        <Badge tone={engineReady ? 'green' : 'amber'}>{engineReady ? 'live' : t('未装载程序', 'no program')}</Badge>
       </div>
 
       <h1 className="mt-3 text-[30px] font-semibold tracking-[-0.02em] text-ink">Register Lab</h1>
@@ -42,11 +44,17 @@ export default function RegisterLab() {
         </Panel>
 
         <div className="space-y-4">
-          <Panel title="Flags & status" subtitle="不属于通用寄存器，但同样是可见状态">
+          <Panel
+            title="Flags & status"
+            subtitle={<T zh="不属于通用寄存器，但同样是可见状态" en="Not general registers, but equally visible" />}
+          >
             <FlagPanel cc={cc} stat={stat} />
           </Panel>
 
-          <Panel title="为什么按编号排" subtitle="顺序不是随便定的">
+          <Panel
+            title={t('为什么按编号排', 'Why numeric order')}
+            subtitle={<T zh="顺序不是随便定的" en="The order is not arbitrary" />}
+          >
             <p className="text-[11.5px] leading-relaxed text-ink-2">
               指令编码里，寄存器只占一个半字节。%rax 编成 0、%rsp 编成 4、%r14 编成 14——
               一旦顺序记错，汇编出来的机器码就会指向另一个寄存器，而且不报错。

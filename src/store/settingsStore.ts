@@ -4,6 +4,21 @@ import { persist } from 'zustand/middleware'
 export type AccentKey = 'blue' | 'purple' | 'cyan' | 'amber'
 export type AnimationSpeed = 0.5 | 1 | 2
 
+/**
+ * 界面语言。
+ * - `zh` / `en`：单一语言，结构完全一致
+ * - `both`：中英对照，主语言仍是中文（英文作为次级行），因此 `<html lang>` 取 zh-CN，
+ *   英文片段各自带 `lang="en"`
+ */
+export type Lang = 'zh' | 'en' | 'both'
+
+/**
+ * 主题。
+ * 只影响语义令牌的取值（`index.css` 里的 `[data-theme]`），
+ * 组件不写死任何颜色，因此新增主题不需要改组件。
+ */
+export type Theme = 'dark' | 'light'
+
 /** 舞台三栏 + 底部面板的尺寸（px）。拖拽结束后才写回，避免每帧都落盘。 */
 export interface PaneSizes {
   left: number
@@ -12,6 +27,10 @@ export interface PaneSizes {
 }
 
 export interface SettingsValues extends PaneSizes {
+  /** 界面语言 */
+  lang: Lang
+  /** 深色 / 浅色主题；对应 :root[data-theme] */
+  theme: Theme
   /** 界面强调色；对应 :root[data-accent] */
   accent: AccentKey
   /** 主动关闭动效（教学场景里常有人只需要静态图） */
@@ -26,6 +45,8 @@ export interface SettingsValues extends PaneSizes {
 export type PaneKey = keyof PaneSizes
 
 export interface SettingsState extends SettingsValues {
+  setLang: (lang: Lang) => void
+  setTheme: (theme: Theme) => void
   setAccent: (accent: AccentKey) => void
   setReduceMotion: (value: boolean) => void
   setShowGrid: (value: boolean) => void
@@ -36,6 +57,9 @@ export interface SettingsState extends SettingsValues {
 }
 
 export const DEFAULT_SETTINGS: SettingsValues = {
+  // 默认中文 + 深色：与项目原有外观一致，老用户升级后视觉不跳变
+  lang: 'zh',
+  theme: 'dark',
   accent: 'blue',
   reduceMotion: false,
   showGrid: true,
@@ -59,6 +83,8 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       ...DEFAULT_SETTINGS,
+      setLang: (lang) => set({ lang }),
+      setTheme: (theme) => set({ theme }),
       setAccent: (accent) => set({ accent }),
       setReduceMotion: (reduceMotion) => set({ reduceMotion }),
       setShowGrid: (showGrid) => set({ showGrid }),
@@ -71,6 +97,8 @@ export const useSettingsStore = create<SettingsState>()(
       name: SETTINGS_STORAGE_KEY,
       version: 1,
       partialize: (state): SettingsValues => ({
+        lang: state.lang,
+        theme: state.theme,
         accent: state.accent,
         reduceMotion: state.reduceMotion,
         showGrid: state.showGrid,
