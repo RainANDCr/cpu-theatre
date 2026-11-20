@@ -1,5 +1,8 @@
 # CPU THEATRE
 
+**[在线试玩 →](https://rainandcr.github.io/cpu-theatre/)** · 无需安装、无需账号、断网也能用
+（首次进入编辑器需下载约 700 KB 的 Monaco，慢网可能等十几秒）
+
 **SEE THE INVISIBLE. UNDERSTAND THE MACHINE.**
 
 一个完全运行在浏览器本地的 Y86-64 处理器可视化实验室：写一段汇编，看它变成机器码，
@@ -88,6 +91,29 @@ npm run lint         # oxlint
 
 离线说明：所有依赖（含 Monaco 编辑器）都从 `node_modules` 打包进产物，运行时不请求任何外部资源。
 首次 `npm install` 需要联网，之后可完全离线开发与运行。
+
+## 部署到 GitHub Pages
+
+线上地址：<https://rainandcr.github.io/cpu-theatre/>。推送到 `main` 即自动发布
+（`.github/workflows/pages.yml`），PR 不部署。
+
+三件在静态托管上必须处理的事：
+
+| 问题 | 处理 |
+| --- | --- |
+| 站点在 `/<repo>/` 下，资源要用绝对前缀 | 构建时读 `CPU_BASE`，默认 `/`，所以本地 dev、桌面版不受影响 |
+| 深链刷新会 404（没有服务器回落） | 产物里放一份 `404.html`（内容同 `index.html`），地址栏不变，React Router 照常接管 |
+| Jekyll 会忽略 `_` 开头的文件 | 产物里放 `.nojekyll` |
+
+本地复现线上环境（模拟「子路径 + 404 回落」，`vite preview` 自带 SPA 回落，测不出这两点）：
+
+```bash
+CPU_BASE=cpu-theatre/ npm run build:pages   # 产物含 404.html 与 .nojekyll
+npm run preview:pages                       # http://localhost:4183/cpu-theatre/
+```
+
+`CPU_BASE` 允许不带前导斜杠：Git Bash 会把 `/cpu-theatre/` 这类环境变量当成本机路径重写，
+构建能过但线上全 404。
 
 ## 技术栈
 
